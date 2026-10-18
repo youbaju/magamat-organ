@@ -11391,6 +11391,8 @@ st.textContent = `
 #shared-oudSvg.organ-mode #handToggleBtn,
 #shared-oudSvg.organ-mode #stringCountBtn{display:none}
 #organLayer .okey{cursor:pointer;transition:transform .06s}
+#organLayer .okey.off{cursor:default}
+svg#shared-oudSvg #organLayer .okey.off rect{pointer-events:none}
 #organLayer .okey.pressed{transform:translateY(5px);filter:brightness(.88) drop-shadow(0 0 4px #ffd54a)}
 #organLayer .okey.blk.pressed{transform:translateY(4px)}
 #organLayer .olabel{pointer-events:none}
@@ -11554,7 +11556,7 @@ function doRender() {
     const wi = start + i;
     const midi = Object.keys(widx).map(Number).find(m => widx[m] === wi);
     const nt = litMap.get(midi), x = kx0 + i * kw;
-    const g = mk('g', { class: 'okey' + (nt && nt.fill === '#ffe100' ? ' oyel' : '') }, keys);
+    const g = mk('g', { class: 'okey' + (nt ? '' : ' off') + (nt && nt.fill === '#ffe100' ? ' oyel' : '') }, keys);
     mk('rect', { x: x + .5, y: ky, width: kw - 1, height: kh, rx: 3, fill: nt ? fillFor(nt) : 'url(#orWhite)', stroke: nt ? strokeFor(nt) : '#8b877c', 'stroke-width': 1.2 }, g);
     if (nt) {
       ring(g, x + .5, ky, kw - 1, kh, nt);
@@ -11573,7 +11575,7 @@ function doRender() {
     if (!NAT.includes((midi + 1) % 12) ) {
       const bm = midi + 1, nt = litMap.get(bm);
       const bw = kw * .62, bx = kx0 + (i + 1) * kw - bw / 2, bh = kh * .62;
-      const g = mk('g', { class: 'okey blk' + (nt && nt.fill === '#ffe100' ? ' oyel' : '') }, keys);
+      const g = mk('g', { class: 'okey blk' + (nt ? '' : ' off') + (nt && nt.fill === '#ffe100' ? ' oyel' : '') }, keys);
       mk('rect', { x: bx, y: ky, width: bw, height: bh, rx: 2.5, fill: nt ? fillFor(nt) : 'url(#orBlack)', stroke: nt ? strokeFor(nt) : '#000', 'stroke-width': 1.2 }, g);
       if (nt) {
         ring(g, bx, ky, bw, bh, nt);
