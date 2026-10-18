@@ -11537,7 +11537,7 @@ function doRender() {
     g.addEventListener('click', () => { nt.rect.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
   }
   function fillFor(nt) { if (!nt) return null; if (nt.fill === '#ffe100') return 'url(#orYel)'; if (nt.fill === '#1B7A3D') return 'url(#orGrn)'; return nt.cur ? 'url(#orCur)' : 'url(#orLit)'; }
-  function strokeFor(nt) { if (nt.fill === '#ffe100') return '#c9a100'; if (nt.fill === '#1B7A3D') return '#0d5225'; return nt.cur ? '#a82f2f' : '#1d4f94'; }
+  function strokeFor(nt) { if (nt.fill === '#ffe100') return '#6b5300'; if (nt.fill === '#1B7A3D') return '#04230f'; return nt.cur ? '#5e1414' : '#06214a'; }
   const marks = [];
   function markFor(g0, nt, cx, cy) {
     if (!nt.mark) return;
@@ -11558,7 +11558,7 @@ function doRender() {
     const midi = Object.keys(widx).map(Number).find(m => widx[m] === wi);
     const nt = litMap.get(midi), x = kx0 + i * kw;
     const g = mk('g', { class: 'okey' + (nt ? '' : ' off') + (nt && nt.fill === '#ffe100' ? ' oyel' : '') }, keys);
-    mk('rect', { x: x + .5, y: ky, width: kw - 1, height: kh, rx: 3, fill: nt ? fillFor(nt) : 'url(#orWhite)', stroke: nt ? strokeFor(nt) : '#8b877c', 'stroke-width': 1.2 }, g);
+    mk('rect', { x: x + 1, y: ky, width: kw - 2, height: kh, rx: 3, fill: nt ? fillFor(nt) : 'url(#orWhite)', stroke: nt ? strokeFor(nt) : '#8b877c', 'stroke-width': nt ? 3 : 1.2 }, g);
     if (nt) {
       ring(g, x + .5, ky, kw - 1, kh, nt);
       addLabel(g, nt, x + kw / 2, ky + kh - 40, kw - 8);
@@ -11577,7 +11577,7 @@ function doRender() {
       const bm = midi + 1, nt = litMap.get(bm);
       const bw = kw * .62, bx = kx0 + (i + 1) * kw - bw / 2, bh = kh * .62;
       const g = mk('g', { class: 'okey blk' + (nt ? '' : ' off') + (nt && nt.fill === '#ffe100' ? ' oyel' : '') }, keys);
-      mk('rect', { x: bx, y: ky, width: bw, height: bh, rx: 2.5, fill: nt ? fillFor(nt) : 'url(#orBlack)', stroke: nt ? strokeFor(nt) : '#000', 'stroke-width': 1.2 }, g);
+      mk('rect', { x: bx, y: ky, width: bw, height: bh, rx: 2.5, fill: nt ? fillFor(nt) : 'url(#orBlack)', stroke: nt ? strokeFor(nt) : '#000', 'stroke-width': nt ? 3 : 1.2 }, g);
       if (nt) {
         ring(g, bx, ky, bw, bh, nt);
         addLabel(g, nt, bx + bw / 2, ky + bh - 34, bw - 6);
