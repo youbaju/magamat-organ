@@ -11371,10 +11371,10 @@ st.textContent = `
 #organLayer .olabel{pointer-events:none}
 #organLayer .olabel text{fill:#fff}
 #organLayer .obase{pointer-events:none;fill:#8d887c;font-family:'Cairo',Arial,sans-serif;font-weight:700}
-#organLayer .pbtn{cursor:pointer;transition:transform .06s}
-#organLayer .pbtn.pressed{transform:translateY(3px);filter:drop-shadow(0 0 4px #ff9f1c)}
-svg#shared-oudSvg #organLayer .okey rect,svg#shared-oudSvg #organLayer .pbtn rect,svg#shared-oudSvg #instrumentToggleBtn rect{pointer-events:auto}
+#organLayer .pbtn{pointer-events:none}
+svg#shared-oudSvg #organLayer .okey rect,svg#shared-oudSvg #instrumentToggleBtn rect{pointer-events:auto}
 svg#shared-oudSvg #organLayer .okey .obase,svg#shared-oudSvg #organLayer .olabel *{pointer-events:none}
+#shared-oudSvg.organ-mode #langToggleBtn,#shared-oudSvg.organ-mode #helpBtn,#shared-oudSvg.organ-mode #noteSystemToggleBtn{transform:translateY(50px)}
 #instrumentToggleBtn{cursor:pointer}
 #instrumentToggleBtn:active{transform:translateY(3px)}
 `;
@@ -11419,7 +11419,7 @@ function collect(src) {
 }
 
 // ===== الرسم =====
-const CW = 1440, CH = 380, X0 = -460, Y0 = 126;
+const X0 = -470; let CW = 1780; const CH = 345, Y0 = 161;
 let busy = false;
 function render() {
   if (busy) return; busy = true;
@@ -11440,9 +11440,7 @@ function doRender() {
     lo = Math.min.apply(null, notes.map(n => lowWhite(n.midi)));
     hi = Math.max.apply(null, notes.map(n => isNat(n.midi) ? widx[n.midi] : widx[n.midi - 1] + 1));
   }
-  const span = hi - lo + 1;
-  const n = Math.min(WN, Math.max(15, span + 2));
-  const start = Math.max(0, Math.min(WN - n, lo - Math.floor((n - span) / 2)));
+  const n = WN, start = 0;
 
   const root = mk('g', { transform: `translate(${X0},${Y0})` }, body);
   mk('rect', { x: 0, y: 0, width: CW, height: CH, rx: 12, fill: 'url(#orChassis)', stroke: '#16171a', 'stroke-width': 3 }, root);
@@ -11454,25 +11452,25 @@ function doRender() {
     const K = 1.6, px = 22, py = 8, cw = 36, ph = 96;
     const pl = mk('g', { transform: `translate(${px},${py}) scale(${K}) translate(${-px},${-py})` }, root);
     mk('rect', { x: px, y: py, width: cw * 12 + 12, height: ph, rx: 6, fill: '#1b1d20', stroke: '#4a4e53', 'stroke-width': 1 }, pl);
-    const t = mk('text', { x: px + 8, y: py + 11, 'font-size': 9, fill: '#9aa0a6', 'font-family': 'Arial,sans-serif', 'font-weight': 700, 'letter-spacing': 1 }, pl);
+    const t = mk('text', { x: px + 8, y: py + 11, 'font-size': 9, fill: '#9aa0a6', 'font-family': 'Arial,sans-serif', 'font-weight': 700, 'letter-spacing': 1, direction: 'ltr', 'text-anchor': 'start' }, pl);
     t.textContent = 'SCALE SETTING';
     for (let c = 0; c < 12; c++) {
       const sharp = !NAT.includes(c);
       const bx = px + 8 + c * cw, on = litPC.has(c);
       const g = mk('g', { class: 'pbtn' }, pl);
+      mk('line', { x1: bx + 14, y1: py + 28, x2: bx + 14, y2: sharp ? py + 36 : py + 62, stroke: '#d9dde0', 'stroke-width': 1.5 }, pl);
       mk('circle', { cx: bx + 14, cy: py + 24, r: 4.5, fill: on ? '#ff3b30' : '#4a1d1d', stroke: '#000', 'stroke-width': .5 }, g);
       if (on) mk('circle', { cx: bx + 14, cy: py + 24, r: 8, fill: '#ff3b30', opacity: .25 }, g);
       mk('rect', {
         x: bx, y: sharp ? py + 36 : py + 62, width: 28, height: 24, rx: 4,
         fill: sharp ? '#55585c' : '#e9e5da',
-        stroke: on ? '#ff9f1c' : '#ffb35a', 'stroke-width': on ? 2.5 : 1, 'stroke-dasharray': on ? '' : '3 2'
+        stroke: on ? '#ff9f1c' : '#ffb35a', 'stroke-width': on ? 2.5 : 1
       }, g);
-      ['pointerdown'].forEach(ev => g.addEventListener(ev, () => { g.classList.add('pressed'); setTimeout(() => g.classList.remove('pressed'), 180); }));
     }
   }
 
   // المفاتيح
-  const kx0 = 24, ky = 182, kh = CH - ky - 12, kw = (CW - 48) / n;
+  const kx0 = 24, ky = 176, kh = CH - ky - 12, kw = (CW - 48) / n;
   const litMap = new Map();
   notes.forEach(nt => { const o = litMap.get(nt.midi); if (!o || (nt.cur && !o.cur)) litMap.set(nt.midi, nt); });
   const keys = mk('g', {}, root);
@@ -11503,6 +11501,7 @@ function doRender() {
   }
   function fillFor(nt) { return nt ? (nt.cur ? 'url(#orCur)' : 'url(#orLit)') : null; }
   function ring(g, x, y, w, h, nt) {
+    return; // بدون إطار أصفر لأول/آخر نغمة
     if (nt && !chord && (nt.idx === '0' || nt.idx === '7') && nt.arabic !== undefined)
       mk('rect', { x: x + 3, y: y + 3, width: w - 6, height: h - 6, rx: 2, fill: 'none', stroke: '#ffd54a', 'stroke-width': 4 }, g);
   }
@@ -11549,7 +11548,7 @@ function placeToggle() {
   const lr = document.querySelector('#langToggleBtn rect');
   if (!lr) return;
   const lx = +lr.getAttribute('x'), ly = +lr.getAttribute('y'), lw = +lr.getAttribute('width'), lh = +lr.getAttribute('height');
-  const x1 = lx, x2 = lx + lw * 2 + 14, h = 70, y = ly + lh + 10;
+  const x1 = lx, x2 = lx + lw * 2 + 14, h = 70, y = ly + lh + 10 + (organMode ? 50 : 0);
   tgRect.setAttribute('x', x1); tgRect.setAttribute('y', y); tgRect.setAttribute('width', x2 - x1); tgRect.setAttribute('height', h);
   tgText.setAttribute('x', (x1 + x2) / 2); tgText.setAttribute('y', y + 50);
   const en = window.oudLanguage === 'en';
