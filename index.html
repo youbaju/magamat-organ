@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<script>(function(){var P='organ_',g=Storage.prototype.getItem,st=Storage.prototype.setItem,r=Storage.prototype.removeItem;Storage.prototype.getItem=function(k){return g.call(this,P+k)};Storage.prototype.setItem=function(k,v){return st.call(this,P+k,v)};Storage.prototype.removeItem=function(k){return r.call(this,P+k)};})();</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -341,13 +343,7 @@ if(dark){document.documentElement.classList.add("pre-dark");setTimeout(function(
   setTimeout(done,2000);
 })();</script>
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-CSHSKLVNB5"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-CSHSKLVNB5');
-</script>
+<script>function gtag(){}</script><!-- GA معطّل بالنسخة التجريبية -->
 
 <style>
 /* =====================================================================
@@ -4693,6 +4689,7 @@ function renderChordHighlight(positions, active){
       // عزفي" تشتغل مع الكوردات تلقائياً، بترتيب التردد الفعلي تصاعدياً (مو الترتيب النظري)
       'data-scale-idx': pitchOrderIdx,
       'data-freq': noteFreqNow,
+      'data-string': pos.string, 'data-fret': pos.fret,
     });
     rect.style.cursor = 'pointer';
     chordHighlightLayer.appendChild(rect);
@@ -11337,5 +11334,247 @@ document.getElementById('shared-playBtn').onclick = async function() {
 } catch(e){} })();
 </script>
 <script>if(window.oudTheme)window.oudTheme.apply(window.oudTheme.get());requestAnimationFrame(function(){requestAnimationFrame(function(){document.documentElement.classList.remove('pre-dark')})});</script>
+<script>
+(function(){
+const svg = document.getElementById('shared-oudSvg'); if (!svg) return;
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+const OPEN = [53, 57, 62, 67, 72, 77];
+const NAT = [0, 2, 4, 5, 7, 9, 11];
+const isNat = m => NAT.indexOf(((m % 12) + 12) % 12) >= 0;
+// مفاتيح الأورغ: فا3 (53) → فا6 (89)
+const MIDI_LO = 53, MIDI_HI = 89;
+const widx = {}; let wc = 0;
+for (let m = MIDI_LO; m <= MIDI_HI; m++) if (isNat(m)) widx[m] = wc++;
+const WN = wc; // 22
+const lowWhite = m => isNat(m) ? widx[m] : widx[m - 1];
+const BASE_AR = { 0: 'دو', 2: 'رى', 4: 'مي', 5: 'فا', 7: 'صول', 9: 'لا', 11: 'سي' };
+const BASE_EN = { 0: 'Do', 2: 'Re', 4: 'Mi', 5: 'Fa', 7: 'Sol', 9: 'La', 11: 'Si' };
+const BASE_LT = { 0: 'C', 2: 'D', 4: 'E', 5: 'F', 7: 'G', 9: 'A', 11: 'B' };
+function baseName(pc) {
+  if (window.oudLanguage !== 'en') return BASE_AR[pc];
+  return window.oudNoteSystem === 'letter' ? BASE_LT[pc] : BASE_EN[pc];
+}
+
+// ===== CSS =====
+const st = document.createElement('style');
+st.textContent = `
+#shared-oudSvg.organ-mode #oudStatic,
+#shared-oudSvg.organ-mode #oudNotesLayer,
+#shared-oudSvg.organ-mode #chordHighlightLayer{visibility:hidden;pointer-events:none}
+#shared-oudSvg.organ-mode #oudFooterGroup,#shared-oudSvg.organ-mode #helpBtn{visibility:visible;pointer-events:auto}
+#shared-oudSvg.organ-mode #handToggleBtn,
+#shared-oudSvg.organ-mode #stringCountBtn{display:none}
+#organLayer .okey{cursor:pointer;transition:transform .06s}
+#organLayer .okey.pressed{transform:translateY(5px);filter:brightness(.88) drop-shadow(0 0 4px #ffd54a)}
+#organLayer .okey.blk.pressed{transform:translateY(4px)}
+#organLayer .olabel{pointer-events:none}
+#organLayer .olabel text{fill:#fff}
+#organLayer .obase{pointer-events:none;fill:#8d887c;font-family:'Cairo',Arial,sans-serif;font-weight:700}
+#organLayer .pbtn{cursor:pointer;transition:transform .06s}
+#organLayer .pbtn.pressed{transform:translateY(3px);filter:drop-shadow(0 0 4px #ff9f1c)}
+svg#shared-oudSvg #organLayer .okey rect,svg#shared-oudSvg #organLayer .pbtn rect,svg#shared-oudSvg #instrumentToggleBtn rect{pointer-events:auto}
+svg#shared-oudSvg #organLayer .okey .obase,svg#shared-oudSvg #organLayer .olabel *{pointer-events:none}
+#instrumentToggleBtn{cursor:pointer}
+#instrumentToggleBtn:active{transform:translateY(3px)}
+`;
+document.head.appendChild(st);
+
+// ===== الحالة =====
+let organMode = false;
+try { organMode = localStorage.getItem('oudInstrument') === 'organ'; } catch (e) {}
+
+const layer = mk('g', { id: 'organLayer' });
+const defs = mk('defs', {}, layer);
+const gr = (id, c1, c2) => { const g = mk('linearGradient', { id, x1: 0, y1: 0, x2: 0, y2: 1 }, defs); mk('stop', { offset: '0', 'stop-color': c1 }, g); mk('stop', { offset: '1', 'stop-color': c2 }, g); };
+gr('orChassis', '#4a4d52', '#25272a');
+gr('orLit', '#5b97ea', '#2b6fc9');
+gr('orCur', '#ef6a6a', '#d64545');
+gr('orWhite', '#fbf9f3', '#e6e2d6');
+gr('orBlack', '#3a3c40', '#0f1012');
+svg.insertBefore(layer, document.getElementById('oudControlBtnsLayer'));
+const body = mk('g', {}, layer);
+
+// ===== مصدر النغمات =====
+function source() {
+  const nl = document.getElementById('oudNotesLayer'), cl = document.getElementById('chordHighlightLayer');
+  const chord = nl && nl.style.display === 'none' && cl && cl.querySelector('rect');
+  return { src: chord ? cl : nl, chord: !!chord };
+}
+function collect(src) {
+  const out = [];
+  src.querySelectorAll('rect').forEach(r => {
+    let q = null, arabic = false;
+    if (r.hasAttribute('data-quarters')) { q = +r.getAttribute('data-quarters'); arabic = true; }
+    else if (r.hasAttribute('data-string')) q = 2 * (OPEN[+r.getAttribute('data-string')] + (+r.getAttribute('data-fret')) - 55);
+    if (q === null || isNaN(q)) return;
+    const half = (((q % 2) + 2) % 2) === 1;
+    const midi = 55 + (half ? (q + 1) / 2 : q / 2);
+    if (midi < MIDI_LO || midi > MIDI_HI) return;
+    out.push({ rect: r, q, half, midi, arabic,
+      idx: r.getAttribute('data-scale-idx'),
+      cur: r.getAttribute('fill') === '#d64545' });
+  });
+  return out;
+}
+
+// ===== الرسم =====
+const CW = 1440, CH = 380, X0 = -460, Y0 = 126;
+let busy = false;
+function render() {
+  if (busy) return; busy = true;
+  try { doRender(); } finally { busy = false; }
+}
+function doRender() {
+  svg.classList.toggle('organ-mode', organMode);
+  layer.style.display = organMode ? '' : 'none';
+  if (!organMode) return;
+  while (body.firstChild) body.removeChild(body.firstChild);
+  const { src, chord } = source();
+  const notes = collect(src);
+  const isArabic = notes.some(n => n.arabic);
+
+  // المدى الظاهر
+  let lo = 0, hi = 14;
+  if (notes.length) {
+    lo = Math.min.apply(null, notes.map(n => lowWhite(n.midi)));
+    hi = Math.max.apply(null, notes.map(n => isNat(n.midi) ? widx[n.midi] : widx[n.midi - 1] + 1));
+  }
+  const span = hi - lo + 1;
+  const n = Math.min(WN, Math.max(15, span + 2));
+  const start = Math.max(0, Math.min(WN - n, lo - Math.floor((n - span) / 2)));
+
+  const root = mk('g', { transform: `translate(${X0},${Y0})` }, body);
+  mk('rect', { x: 0, y: 0, width: CW, height: CH, rx: 12, fill: 'url(#orChassis)', stroke: '#16171a', 'stroke-width': 3 }, root);
+
+  // لوحة Scale Setting
+  const litPC = new Set();
+  if (isArabic) notes.forEach(nt => { if (nt.half) litPC.add(nt.midi % 12); });
+  if (isArabic) {
+    const K = 1.6, px = 22, py = 8, cw = 36, ph = 96;
+    const pl = mk('g', { transform: `translate(${px},${py}) scale(${K}) translate(${-px},${-py})` }, root);
+    mk('rect', { x: px, y: py, width: cw * 12 + 12, height: ph, rx: 6, fill: '#1b1d20', stroke: '#4a4e53', 'stroke-width': 1 }, pl);
+    const t = mk('text', { x: px + 8, y: py + 11, 'font-size': 9, fill: '#9aa0a6', 'font-family': 'Arial,sans-serif', 'font-weight': 700, 'letter-spacing': 1 }, pl);
+    t.textContent = 'SCALE SETTING';
+    for (let c = 0; c < 12; c++) {
+      const sharp = !NAT.includes(c);
+      const bx = px + 8 + c * cw, on = litPC.has(c);
+      const g = mk('g', { class: 'pbtn' }, pl);
+      mk('circle', { cx: bx + 14, cy: py + 24, r: 4.5, fill: on ? '#ff3b30' : '#4a1d1d', stroke: '#000', 'stroke-width': .5 }, g);
+      if (on) mk('circle', { cx: bx + 14, cy: py + 24, r: 8, fill: '#ff3b30', opacity: .25 }, g);
+      mk('rect', {
+        x: bx, y: sharp ? py + 36 : py + 62, width: 28, height: 24, rx: 4,
+        fill: sharp ? '#55585c' : '#e9e5da',
+        stroke: on ? '#ff9f1c' : '#ffb35a', 'stroke-width': on ? 2.5 : 1, 'stroke-dasharray': on ? '' : '3 2'
+      }, g);
+      ['pointerdown'].forEach(ev => g.addEventListener(ev, () => { g.classList.add('pressed'); setTimeout(() => g.classList.remove('pressed'), 180); }));
+    }
+  }
+
+  // المفاتيح
+  const kx0 = 24, ky = 182, kh = CH - ky - 12, kw = (CW - 48) / n;
+  const litMap = new Map();
+  notes.forEach(nt => { const o = litMap.get(nt.midi); if (!o || (nt.cur && !o.cur)) litMap.set(nt.midi, nt); });
+  const keys = mk('g', {}, root);
+
+  function addLabel(parent, nt, cxKey, cyKey, maxW) {
+    const els = Array.from(src.querySelectorAll('[data-scale-idx="' + nt.idx + '"]')).filter(e => e.tagName !== 'rect');
+    if (!els.length) return;
+    const outer = mk('g', { class: 'olabel' }, parent);
+    const inner = mk('g', {}, outer);
+    const rx = +nt.rect.getAttribute('x') + (+nt.rect.getAttribute('width')) / 2;
+    const ry = +nt.rect.getAttribute('y') + (+nt.rect.getAttribute('height')) / 2;
+    els.forEach(e => {
+      const c = e.cloneNode(true);
+      c.removeAttribute('transform'); c.querySelectorAll('*').forEach(x => x.removeAttribute('transform'));
+      inner.appendChild(c);
+    });
+    let bb; try { bb = inner.getBBox(); } catch (e) { bb = { x: rx - 20, y: ry - 12, width: 40, height: 24 }; }
+    const s = Math.min(1.3, maxW / Math.max(1, bb.width));
+    inner.setAttribute('transform', `translate(${-(bb.x + bb.width / 2)},${-(bb.y + bb.height / 2)})`);
+    outer.setAttribute('transform', `translate(${cxKey},${cyKey}) scale(${s})`);
+  }
+  function bindKey(g, nt) {
+    const down = () => { g.classList.add('pressed'); };
+    const up = () => setTimeout(() => g.classList.remove('pressed'), 120);
+    g.addEventListener('pointerdown', down);
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(e => g.addEventListener(e, up));
+    g.addEventListener('click', () => { nt.rect.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
+  }
+  function fillFor(nt) { return nt ? (nt.cur ? 'url(#orCur)' : 'url(#orLit)') : null; }
+  function ring(g, x, y, w, h, nt) {
+    if (nt && !chord && (nt.idx === '0' || nt.idx === '7') && nt.arabic !== undefined)
+      mk('rect', { x: x + 3, y: y + 3, width: w - 6, height: h - 6, rx: 2, fill: 'none', stroke: '#ffd54a', 'stroke-width': 4 }, g);
+  }
+
+  // البيضاء
+  for (let i = 0; i < n; i++) {
+    const wi = start + i;
+    const midi = Object.keys(widx).map(Number).find(m => widx[m] === wi);
+    const nt = litMap.get(midi), x = kx0 + i * kw;
+    const g = mk('g', { class: 'okey' }, keys);
+    mk('rect', { x: x + .5, y: ky, width: kw - 1, height: kh, rx: 3, fill: nt ? fillFor(nt) : 'url(#orWhite)', stroke: nt ? (nt.cur ? '#a82f2f' : '#1d4f94') : '#8b877c', 'stroke-width': 1.2 }, g);
+    if (nt) {
+      ring(g, x + .5, ky, kw - 1, kh, nt);
+      addLabel(g, nt, x + kw / 2, ky + kh - 40, kw - 8);
+      bindKey(g, nt);
+    } else {
+      const t = mk('text', { class: 'obase', x: x + kw / 2, y: ky + kh - 22, 'text-anchor': 'middle', 'font-size': Math.min(30, kw * .27) }, g);
+      t.textContent = baseName(midi % 12);
+    }
+  }
+  // السوداء
+  for (let i = 0; i < n - 1; i++) {
+    const wi = start + i;
+    const midi = Object.keys(widx).map(Number).find(m => widx[m] === wi);
+    if (!NAT.includes((midi + 1) % 12) ) {
+      const bm = midi + 1, nt = litMap.get(bm);
+      const bw = kw * .62, bx = kx0 + (i + 1) * kw - bw / 2, bh = kh * .62;
+      const g = mk('g', { class: 'okey blk' }, keys);
+      mk('rect', { x: bx, y: ky, width: bw, height: bh, rx: 2.5, fill: nt ? fillFor(nt) : 'url(#orBlack)', stroke: nt ? (nt.cur ? '#a82f2f' : '#1d4f94') : '#000', 'stroke-width': 1.2 }, g);
+      if (nt) {
+        ring(g, bx, ky, bw, bh, nt);
+        addLabel(g, nt, bx + bw / 2, ky + bh - 34, bw - 6);
+        bindKey(g, nt);
+      }
+    }
+  }
+}
+
+// ===== زر التبديل =====
+const tg = mk('g', { id: 'instrumentToggleBtn' }, svg);
+const tgRect = mk('rect', { rx: 18, fill: '#a3d0ec', stroke: '#3ab4e8', 'stroke-width': 2 }, tg);
+const tgText = mk('text', { 'text-anchor': 'middle', 'font-family': "'Cairo',Arial,sans-serif", 'font-weight': 800, fill: '#0a2f52', 'font-size': 48 }, tg);
+function placeToggle() {
+  const lr = document.querySelector('#langToggleBtn rect');
+  if (!lr) return;
+  const lx = +lr.getAttribute('x'), ly = +lr.getAttribute('y'), lw = +lr.getAttribute('width'), lh = +lr.getAttribute('height');
+  const x1 = lx, x2 = lx + lw * 2 + 14, h = 70, y = ly + lh + 10;
+  tgRect.setAttribute('x', x1); tgRect.setAttribute('y', y); tgRect.setAttribute('width', x2 - x1); tgRect.setAttribute('height', h);
+  tgText.setAttribute('x', (x1 + x2) / 2); tgText.setAttribute('y', y + 50);
+  const en = window.oudLanguage === 'en';
+  tgText.textContent = organMode ? (en ? 'Oud' : 'عود') : (en ? 'Organ' : 'أورغ');
+}
+tg.addEventListener('click', () => {
+  organMode = !organMode;
+  try { localStorage.setItem('oudInstrument', organMode ? 'organ' : 'oud'); } catch (e) {}
+  placeToggle(); render();
+});
+
+// ===== المراقبة =====
+let raf = 0;
+const sched = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; if (organMode) render(); }); };
+const mo = new MutationObserver(sched);
+['oudNotesLayer', 'chordHighlightLayer'].forEach(id => {
+  const e = document.getElementById(id);
+  if (e) mo.observe(e, { childList: true, subtree: true, attributes: true, attributeFilter: ['fill', 'stroke', 'style'] });
+});
+const cb = document.getElementById('oudControlBtnsLayer');
+if (cb) new MutationObserver(() => { placeToggle(); }).observe(cb, { childList: true });
+placeToggle(); render();
+setTimeout(() => { placeToggle(); render(); }, 600);
+window.addEventListener('load', () => { placeToggle(); render(); });
+})();
+</script>
 </body>
 </html>
