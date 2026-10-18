@@ -11370,6 +11370,8 @@ st.textContent = `
 #organLayer .okey.blk.pressed{transform:translateY(4px)}
 #organLayer .olabel{pointer-events:none}
 #organLayer .olabel text{fill:#fff}
+#organLayer .oyel .olabel text{fill:#111}
+#organLayer .oyel .olabel line,#organLayer .oyel .olabel path,#organLayer .oyel .olabel circle{stroke:#111}
 #organLayer .obase{pointer-events:none;fill:#8d887c;font-family:'Cairo',Arial,sans-serif;font-weight:700}
 #organLayer .pbtn{pointer-events:none}
 svg#shared-oudSvg #organLayer .okey rect,svg#shared-oudSvg #instrumentToggleBtn rect{pointer-events:auto}
@@ -11392,6 +11394,8 @@ gr('orLit', '#5b97ea', '#2b6fc9');
 gr('orCur', '#ef6a6a', '#d64545');
 gr('orWhite', '#fbf9f3', '#e6e2d6');
 gr('orBlack', '#3a3c40', '#0f1012');
+gr('orYel', '#ffe970', '#ffd000');
+gr('orGrn', '#2fae5f', '#1B7A3D');
 svg.insertBefore(layer, document.getElementById('oudControlBtnsLayer'));
 const body = mk('g', {}, layer);
 
@@ -11413,13 +11417,15 @@ function collect(src) {
     if (midi < MIDI_LO || midi > MIDI_HI) return;
     out.push({ rect: r, q, half, midi, arabic,
       idx: r.getAttribute('data-scale-idx'),
-      cur: r.getAttribute('fill') === '#d64545' });
+      cur: r.getAttribute('fill') === '#d64545',
+      fill: r.getAttribute('fill'),
+      mark: (r._micMarkEls && r._micMarkEls[0]) ? { ok: r._micMarkEls[0].getAttribute('fill') === '#1B7A3D', txt: r._micMarkEls[1] ? r._micMarkEls[1].textContent : '' } : null });
   });
   return out;
 }
 
 // ===== الرسم =====
-const X0 = -470; let CW = 1780; const CH = 345, Y0 = 161;
+let X0 = -470, CW = 1780; const CH = 345, Y0 = 161;
 let busy = false;
 function render() {
   if (busy) return; busy = true;
@@ -11428,8 +11434,10 @@ function render() {
 function doRender() {
   svg.classList.toggle('organ-mode', organMode);
   layer.style.display = organMode ? '' : 'none';
-  if (!organMode) return;
+  placeToggle();
+  if (!organMode) { layoutFooter(); return; }
   while (body.firstChild) body.removeChild(body.firstChild);
+  { const vb = svg.viewBox.baseVal; if (vb && vb.width) { X0 = vb.x + 10; CW = vb.width - 20; } }
   const { src, chord } = source();
   const notes = collect(src);
   const isArabic = notes.some(n => n.arabic);
@@ -11472,7 +11480,8 @@ function doRender() {
   // المفاتيح
   const kx0 = 24, ky = 176, kh = CH - ky - 12, kw = (CW - 48) / n;
   const litMap = new Map();
-  notes.forEach(nt => { const o = litMap.get(nt.midi); if (!o || (nt.cur && !o.cur)) litMap.set(nt.midi, nt); });
+  const pri = nt => nt.fill === '#ffe100' ? 3 : (nt.cur ? 2 : (nt.fill === '#1B7A3D' ? 1 : 0));
+  notes.forEach(nt => { const o = litMap.get(nt.midi); if (!o || pri(nt) > pri(o)) litMap.set(nt.midi, nt); });
   const keys = mk('g', {}, root);
 
   function addLabel(parent, nt, cxKey, cyKey, maxW) {
@@ -11499,7 +11508,16 @@ function doRender() {
     ['pointerup', 'pointerleave', 'pointercancel'].forEach(e => g.addEventListener(e, up));
     g.addEventListener('click', () => { nt.rect.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
   }
-  function fillFor(nt) { return nt ? (nt.cur ? 'url(#orCur)' : 'url(#orLit)') : null; }
+  function fillFor(nt) { if (!nt) return null; if (nt.fill === '#ffe100') return 'url(#orYel)'; if (nt.fill === '#1B7A3D') return 'url(#orGrn)'; return nt.cur ? 'url(#orCur)' : 'url(#orLit)'; }
+  function strokeFor(nt) { if (nt.fill === '#ffe100') return '#c9a100'; if (nt.fill === '#1B7A3D') return '#0d5225'; return nt.cur ? '#a82f2f' : '#1d4f94'; }
+  const marks = [];
+  function markFor(g0, nt, cx, cy) {
+    if (!nt.mark) return;
+    const g = mk('g', {}, root); marks.push(g);
+    mk('circle', { cx, cy, r: 15, fill: nt.mark.ok ? '#1B7A3D' : '#c0392b', stroke: '#fff', 'stroke-width': 2.5, 'pointer-events': 'none' }, g);
+    const t = mk('text', { x: cx, y: cy + 6, 'text-anchor': 'middle', 'font-size': 18, 'font-weight': 'bold', fill: '#fff', 'pointer-events': 'none' }, g);
+    t.textContent = nt.mark.txt;
+  }
   function ring(g, x, y, w, h, nt) {
     return; // بدون إطار أصفر لأول/آخر نغمة
     if (nt && !chord && (nt.idx === '0' || nt.idx === '7') && nt.arabic !== undefined)
@@ -11511,11 +11529,12 @@ function doRender() {
     const wi = start + i;
     const midi = Object.keys(widx).map(Number).find(m => widx[m] === wi);
     const nt = litMap.get(midi), x = kx0 + i * kw;
-    const g = mk('g', { class: 'okey' }, keys);
-    mk('rect', { x: x + .5, y: ky, width: kw - 1, height: kh, rx: 3, fill: nt ? fillFor(nt) : 'url(#orWhite)', stroke: nt ? (nt.cur ? '#a82f2f' : '#1d4f94') : '#8b877c', 'stroke-width': 1.2 }, g);
+    const g = mk('g', { class: 'okey' + (nt && nt.fill === '#ffe100' ? ' oyel' : '') }, keys);
+    mk('rect', { x: x + .5, y: ky, width: kw - 1, height: kh, rx: 3, fill: nt ? fillFor(nt) : 'url(#orWhite)', stroke: nt ? strokeFor(nt) : '#8b877c', 'stroke-width': 1.2 }, g);
     if (nt) {
       ring(g, x + .5, ky, kw - 1, kh, nt);
       addLabel(g, nt, x + kw / 2, ky + kh - 40, kw - 8);
+      markFor(g, nt, x + kw / 2, ky + 20);
       bindKey(g, nt);
     } else {
       const t = mk('text', { class: 'obase', x: x + kw / 2, y: ky + kh - 22, 'text-anchor': 'middle', 'font-size': Math.min(30, kw * .27) }, g);
@@ -11529,26 +11548,35 @@ function doRender() {
     if (!NAT.includes((midi + 1) % 12) ) {
       const bm = midi + 1, nt = litMap.get(bm);
       const bw = kw * .62, bx = kx0 + (i + 1) * kw - bw / 2, bh = kh * .62;
-      const g = mk('g', { class: 'okey blk' }, keys);
-      mk('rect', { x: bx, y: ky, width: bw, height: bh, rx: 2.5, fill: nt ? fillFor(nt) : 'url(#orBlack)', stroke: nt ? (nt.cur ? '#a82f2f' : '#1d4f94') : '#000', 'stroke-width': 1.2 }, g);
+      const g = mk('g', { class: 'okey blk' + (nt && nt.fill === '#ffe100' ? ' oyel' : '') }, keys);
+      mk('rect', { x: bx, y: ky, width: bw, height: bh, rx: 2.5, fill: nt ? fillFor(nt) : 'url(#orBlack)', stroke: nt ? strokeFor(nt) : '#000', 'stroke-width': 1.2 }, g);
       if (nt) {
         ring(g, bx, ky, bw, bh, nt);
         addLabel(g, nt, bx + bw / 2, ky + bh - 34, bw - 6);
+        markFor(g, nt, bx + bw / 2, ky + 20);
         bindKey(g, nt);
       }
     }
   }
+  placeToggle(); layoutFooter();
 }
 
 // ===== زر التبديل =====
 const tg = mk('g', { id: 'instrumentToggleBtn' }, svg);
 const tgRect = mk('rect', { rx: 18, fill: '#a3d0ec', stroke: '#3ab4e8', 'stroke-width': 2 }, tg);
 const tgText = mk('text', { 'text-anchor': 'middle', 'font-family': "'Cairo',Arial,sans-serif", 'font-weight': 800, fill: '#0a2f52', 'font-size': 48 }, tg);
+function svgBox(el) {
+  const r = el.getBoundingClientRect(), inv = svg.getScreenCTM().inverse();
+  const pt = (x, y) => { const p = svg.createSVGPoint(); p.x = x; p.y = y; return p.matrixTransform(inv); };
+  const a = pt(r.left, r.top), c = pt(r.right, r.bottom);
+  return { x1: Math.min(a.x, c.x), x2: Math.max(a.x, c.x), y1: Math.min(a.y, c.y), y2: Math.max(a.y, c.y) };
+}
 function placeToggle() {
-  const lr = document.querySelector('#langToggleBtn rect');
+  const lr = document.querySelector('#langToggleBtn rect'), hr = document.querySelector('#helpBtn rect');
   if (!lr) return;
-  const lx = +lr.getAttribute('x'), ly = +lr.getAttribute('y'), lw = +lr.getAttribute('width'), lh = +lr.getAttribute('height');
-  const x1 = lx, x2 = lx + lw * 2 + 14, h = 70, y = ly + lh + 10 + (organMode ? 50 : 0);
+  const L = svgBox(lr), H = hr ? svgBox(hr) : L;
+  const x1 = Math.min(L.x1, H.x1), x2 = Math.max(L.x2, H.x2);
+  const h = 70, y = Math.max(L.y2, H.y2) + 10;
   tgRect.setAttribute('x', x1); tgRect.setAttribute('y', y); tgRect.setAttribute('width', x2 - x1); tgRect.setAttribute('height', h);
   tgText.setAttribute('x', (x1 + x2) / 2); tgText.setAttribute('y', y + 50);
   const en = window.oudLanguage === 'en';
@@ -11560,6 +11588,35 @@ tg.addEventListener('click', () => {
   placeToggle(); render();
 });
 
+// ===== توزيع أزرار التذييل تحت الأورغ =====
+function layoutFooter() {
+  const f = document.getElementById('oudFooterGroup'); if (!f) return;
+  const items = Array.from(f.children).filter(c => c.tagName === 'g');
+  items.forEach(c => {
+    if (c.dataset.oT === undefined) c.dataset.oT = c.getAttribute('transform') || '';
+    if (c.dataset.oT) c.setAttribute('transform', c.dataset.oT); else c.removeAttribute('transform');
+  });
+  if (!organMode || !items.length) return;
+  const colEls = ['#langToggleBtn rect', '#helpBtn rect', '#noteSystemToggleBtn rect', '#instrumentToggleBtn rect']
+    .map(q => document.querySelector(q)).filter(Boolean).map(svgBox);
+  if (!colEls.length) return;
+  const col = { x1: Math.min.apply(null, colEls.map(b => b.x1)), x2: Math.max.apply(null, colEls.map(b => b.x2)) };
+  const boxes = items.map(c => ({ c, b: svgBox(c) }));
+  const sumW = boxes.reduce((s, o) => s + (o.b.x2 - o.b.x1), 0);
+  const colOnRight = (col.x1 + col.x2) / 2 > X0 + CW / 2;
+  const sg = (f.getScreenCTM().a * svg.getScreenCTM().a) >= 0 ? 1 : -1;
+  const put = (o, dx) => { dx *= sg; const t = o.c.dataset.oT; o.c.setAttribute('transform', `translate(${dx},0)` + (t ? ' ' + t : '')); };
+  if (colOnRight) {
+    boxes.sort((a, b) => a.b.x1 - b.b.x1);
+    const gap = (col.x1 - X0 - sumW) / boxes.length; let x = X0;
+    boxes.forEach(o => { put(o, x - o.b.x1); x += (o.b.x2 - o.b.x1) + gap; });
+  } else {
+    boxes.sort((a, b) => b.b.x2 - a.b.x2);
+    const R = X0 + CW, gap = (R - col.x2 - sumW) / boxes.length; let x = R;
+    boxes.forEach(o => { put(o, x - o.b.x2); x -= (o.b.x2 - o.b.x1) + gap; });
+  }
+}
+
 // ===== المراقبة =====
 let raf = 0;
 const sched = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; if (organMode) render(); }); };
@@ -11569,7 +11626,9 @@ const mo = new MutationObserver(sched);
   if (e) mo.observe(e, { childList: true, subtree: true, attributes: true, attributeFilter: ['fill', 'stroke', 'style'] });
 });
 const cb = document.getElementById('oudControlBtnsLayer');
-if (cb) new MutationObserver(() => { placeToggle(); }).observe(cb, { childList: true });
+if (cb) new MutationObserver(() => { placeToggle(); layoutFooter(); }).observe(cb, { childList: true });
+const os = document.getElementById('oudStatic');
+if (os) new MutationObserver(() => { if (organMode) sched(); }).observe(os, { childList: true });
 placeToggle(); render();
 setTimeout(() => { placeToggle(); render(); }, 600);
 window.addEventListener('load', () => { placeToggle(); render(); });
