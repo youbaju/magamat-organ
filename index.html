@@ -11495,16 +11495,22 @@ function doRender() {
     const ln = (d) => mk('path', { d, fill: 'none', stroke: LC, 'stroke-width': 1 }, pl);
     ln(`M${bd(0)},${py + 14} H${bd(12)}`);
     // الخط السفلي الموحّد للمجموعتين (C–E) و(F–B)
-    ln(`M${bd(0)},${yTop} V${yBus - 6} Q${bd(0)},${yBus} ${bd(0) + 6},${yBus} H${bd(5) - 6} Q${bd(5)},${yBus} ${bd(5)},${yBus - 6} V${yTop}`);
-    ln(`M${bd(5)},${yTop} V${yBus - 6} Q${bd(5)},${yBus} ${bd(5) + 6},${yBus} H${bd(12) - 6} Q${bd(12)},${yBus} ${bd(12)},${yBus - 6} V${yTop}`);
+    // الخط السفلي: ينقسم عند كل صعود (إلى إطار الأسود أو الحافة) بالتقاء بزاوية صغيرة مثل الفاصل بين المي والفا
+    const cxOf = c => b0 + c * cw + cw / 2, R = 3;
+    const bus = pts => {
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p = pts[i], q = pts[i + 1];
+        ln(`M${p.x},${p.up} V${yBus - R} Q${p.x},${yBus} ${p.x + R},${yBus} H${q.x - R} Q${q.x},${yBus} ${q.x},${yBus - R} V${q.up}`);
+      }
+    };
+    const E = k => ({ x: bd(k), up: yTop }), S = c => ({ x: cxOf(c), up: yU });
+    bus([E(0), S(1), S(3), E(5)]);
+    bus([E(5), S(6), S(8), S(10), E(12)]);
     for (let c = 0; c < 12; c++) {
       const sharp = !NAT.includes(c), on = litPC.has(c);
       const cx = b0 + c * cw + cw / 2, g = mk('g', { class: 'pbtn' }, pl);
       if (sharp) {
         ln(`M${bd(c)},${yTop} V${yU - 6} Q${bd(c)},${yU} ${bd(c) + 6},${yU} H${bd(c + 1) - 6} Q${bd(c + 1)},${yU} ${bd(c + 1)},${yU - 6} V${yTop}`);
-        ln(`M${cx},${yU} V${yBus}`);
-      } else {
-        ln(`M${cx},${py + 80} V${yBus}`);
       }
       if (on) mk('circle', { cx, cy: py + 25, r: 8, fill: '#ff3b30', opacity: .28 }, g);
       mk('circle', { cx, cy: py + 25, r: 4.5, fill: on ? '#ff3b30' : '#5a1717', stroke: '#000', 'stroke-width': .5 }, g);
