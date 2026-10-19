@@ -123,7 +123,26 @@ if(dark){document.documentElement.classList.add("pre-dark");setTimeout(function(
   // فهرس صفحة الشرح: يقفز بسلاسة للقسم المطلوب لما تضغط عليه بالفهرس
   window.scrollToHelpSection = function(id){
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!el) return;
+    // الصور بالشرح كسولة التحميل (ارتفاعها يتغيّر بعد تحميلها) فالتمرير السلس كان يستقر بمكان خاطئ.
+    // الحل: نحمّل صور الصفحة فوراً، ننتقل مباشرة، ثم نعيد الضبط عدة مرات حتى يستقر الارتفاع.
+    let c = el.parentElement;
+    while (c && c !== document.body) {
+      const cs = getComputedStyle(c);
+      if (/(auto|scroll)/.test(cs.overflowY) && c.scrollHeight > c.clientHeight) break;
+      c = c.parentElement;
+    }
+    if (!c || c === document.body) { el.scrollIntoView({ block: 'start' }); return; }
+    c.querySelectorAll('img[loading="lazy"]').forEach(function(im){ im.loading = 'eager'; });
+    const align = function(){
+      const d = el.getBoundingClientRect().top - c.getBoundingClientRect().top - 10;
+      if (Math.abs(d) > 2) c.scrollTop += d;
+    };
+    align();
+    [100, 300, 700, 1200, 2000].forEach(function(t){ setTimeout(align, t); });
+    c.querySelectorAll('img').forEach(function(im){
+      if (!im.complete) im.addEventListener('load', align, { once: true });
+    });
   };
   // نضيف زر "رجوع للفهرس" تلقائياً بنهاية كل قسم شرح — بدل ما نكرره يدوياً بكل قسم من
   // الـ٣٦ قسم (١٨ عربي + ١٨ إنجليزي)، نولّده مرة وحدة بالكود بمجرد ما الصفحة تحمّل
@@ -1239,6 +1258,7 @@ flex-shrink: 0;
   /* ===== أزرار اختيار نوع السلم ===== */
   .scale-buttons{ display:flex; gap:5px; flex-wrap:wrap; justify-content:center; }
   .scale-btn{
+    font-family:'Cairo','Segoe UI',Tahoma,sans-serif;
     background:#f5f1ea;
     color: #5a4a35;
     border:1.5px solid #e3dccb;
@@ -1256,6 +1276,12 @@ flex-shrink: 0;
     font-weight:700;
   }
   .scale-btn:hover{ filter:brightness(.97); }
+  /* الكمبيوتر: الشاشة كبيرة فنكبّر أزرار نوع السلم وخطها (الجوال والتابلت لا يتأثران) */
+  @media (min-width:1025px){
+    .scale-buttons{ gap:8px; }
+    .scale-btn{ font-size:clamp(.9rem,1.15vw,1.35rem); padding:5px clamp(14px,1.4vw,26px); }
+    .c-selection-summary .now-playing{ font-size:clamp(1rem,1.25vw,1.45rem); }
+  }
 
   .now-playing{
     font-size:.88rem;
@@ -5945,7 +5971,7 @@ function buildOudStatic(){
     'font-family':"'Cairo', 'Segoe UI', Tahoma, sans-serif",
     'font-size':'30', 'font-weight':'800', fill:'#0a2f52'
   });
-  btnText.textContent = (window.oudLanguage === 'en') ? 'Contact Us' : 'تواصل معنا';
+  btnText.textContent = (window.oudLanguage === 'en') ? 'Contact' : 'تواصل';
   contactG.appendChild(btnRect);
   contactG.appendChild(btnText);
   oudFooterGroup.appendChild(contactG);
@@ -5961,7 +5987,7 @@ function buildOudStatic(){
     x: ratingBtnX + btnW/2, y: btnY + btnH/2 + 12,
     'text-anchor':'middle', 'dominant-baseline':'middle',
     'font-family':"'Cairo', 'Segoe UI', Tahoma, sans-serif",
-    'font-size':'30', 'font-weight':'800', fill:'#0a2f52'
+    'font-size':'40', 'font-weight':'800', fill:'#0a2f52'
   });
   const ratingWord = (window.oudLanguage === 'en') ? 'Rate' : 'تقييم';
   ratingText.textContent = (window.oudLanguage === 'en') ? ('⭐ ' + ratingWord) : (ratingWord + ' ⭐');
@@ -5980,7 +6006,7 @@ function buildOudStatic(){
     const themeRect = el('rect', { x: tX, y: btnY, width: tW, height: btnH, rx: btnR, fill:'#a3d0ec', stroke:'#3ab4e8', 'stroke-width':'5' });
     const themeText = el('text', {
       x: tX + tW/2, y: btnY + btnH/2 + 12, 'text-anchor':'middle', 'dominant-baseline':'middle',
-      'font-family':"'Cairo', 'Segoe UI', Tahoma, sans-serif", 'font-size':'30', 'font-weight':'800', fill:'#0a2f52'
+      'font-family':"'Cairo', 'Segoe UI', Tahoma, sans-serif", 'font-size':'40', 'font-weight':'800', fill:'#0a2f52'
     });
     const refreshTheme = () => {
       const m = (window.oudTheme ? window.oudTheme.effective() : 'light');
@@ -6091,15 +6117,15 @@ function buildOudStatic(){
     const nBtnX = spanL + copyrightTextMaxW + gapFt;
     const nRatingX = nBtnX + bw + gapFt;
     btnRect.setAttribute('x', nBtnX); btnRect.setAttribute('width', bw);
-    btnText.setAttribute('x', nBtnX + bw / 2); btnText.setAttribute('font-size', fsz);
+    btnText.setAttribute('x', nBtnX + bw / 2); btnText.setAttribute('font-size', Math.round(fsz * 1.3));
     ratingRect.setAttribute('x', nRatingX); ratingRect.setAttribute('width', bw);
-    ratingText.setAttribute('x', nRatingX + bw / 2); ratingText.setAttribute('font-size', fsz);
+    ratingText.setAttribute('x', nRatingX + bw / 2); ratingText.setAttribute('font-size', Math.round(fsz * 1.3));
     const nCpX = nBtnX - gapFt - copyrightTextMaxW + cpHandOffset;
     [cp1, cp2, cpName, cp3].forEach(t => t.setAttribute('x', nCpX));
     if (themeParts) { // زر المظهر: بعد زر التقييم مباشرة بفراغ ثابت (يقع بجانب الزند بعد الانعكاس)
       const tx = nRatingX + bw + gapFt;
       themeParts.rect.setAttribute('x', tx); themeParts.rect.setAttribute('width', tw);
-      themeParts.text.setAttribute('x', tx + tw / 2); themeParts.text.setAttribute('font-size', fsz);
+      themeParts.text.setAttribute('x', tx + tw / 2); themeParts.text.setAttribute('font-size', Math.round(fsz * 1.3));
     }
   }
 
@@ -11620,10 +11646,13 @@ function placeToggle() {
   const lr = document.querySelector('#langToggleBtn rect'), hr = document.querySelector('#helpBtn rect');
   if (!lr) return;
   const L = svgBox(lr), H = hr ? svgBox(hr) : L;
-  const x1 = Math.min(L.x1, H.x1), x2 = Math.max(L.x2, H.x2);
-  const h = 70, y = Math.max(L.y2, H.y2) + 10;
+  let x1 = Math.min(L.x1, H.x1), x2 = Math.max(L.x2, H.x2);
+  // بالإنجليزية يظهر زر Do/C كزر ثالث فوق: نمدّ الزر ليغطي الثلاثة
+  const nr = document.querySelector('#noteSystemToggleBtn rect');
+  if (nr && nr.getBoundingClientRect().width > 0) { const N = svgBox(nr); x1 = Math.min(x1, N.x1); x2 = Math.max(x2, N.x2); }
+  const h = Math.round(L.y2 - L.y1) || 70, y = Math.max(L.y2, H.y2) + 10;
   tgRect.setAttribute('x', x1); tgRect.setAttribute('y', y); tgRect.setAttribute('width', x2 - x1); tgRect.setAttribute('height', h);
-  tgText.setAttribute('x', (x1 + x2) / 2); tgText.setAttribute('y', y + 50);
+  tgText.setAttribute('x', (x1 + x2) / 2); tgText.setAttribute('y', y + h * 0.66);
   const en = window.oudLanguage === 'en';
   tgText.textContent = organMode ? (en ? 'Organ' : 'أورغ') : (en ? 'Oud' : 'عود');
 }
