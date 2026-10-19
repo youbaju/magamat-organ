@@ -11812,7 +11812,7 @@ function filterRoots() {
       px = parseFloat(getComputedStyle(ht).fontSize) * ctm.a;   // خط المفضلة = خط «يمين/يسار» بالضبط
       if (!(px > 0)) px = (parseFloat(ht.dataset.f0) || 24) * ctm.a;
     }
-    const Wf = Math.max(Ws, favEm * px + 12);               // المفضلة كلمة واحدة: عرضها يكفي نصها
+    const Wf = phone ? Math.max(Ws, favEm * px + 5) : Math.max(Ws, favEm * px + 12);               // المفضلة كلمة واحدة: عرضها يكفي نصها
     const dir = onRight ? -1 : 1;
     const outer = sb ? (onRight ? sb.right : sb.left) : (onRight ? b.right : b.left);
     // المفضلة تأخذ أقصى الصف (محاذية لنهاية الأورغ)
