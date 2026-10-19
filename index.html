@@ -6027,6 +6027,7 @@ function buildOudStatic(){
       const w = isEn ? (m === 'dark' ? 'Dark' : 'Light') : (m === 'dark' ? 'داكن' : 'فاتح');
       const ic = (m === 'dark') ? '\uD83C\uDF19' : '\u2600\uFE0F';
       themeText.textContent = isEn ? (ic + ' ' + w) : (w + ' ' + ic);
+      if (window.fitFooterBtnTexts) window.fitFooterBtnTexts();
     };
     refreshTheme();
     themeParts = { rect: themeRect, text: themeText, w: tW };
@@ -6142,6 +6143,25 @@ function buildOudStatic(){
       themeParts.text.setAttribute('x', tx + tw / 2); themeParts.text.setAttribute('font-size', Math.round(fsz * 1.3));
     }
   }
+
+  // يضمن بقاء نص أزرار التذييل (وأيقونة الشمس/القمر) داخل أزرارها مهما اختلف عرض خط/إيموجي الجهاز (آيباد وغيره)
+  window.fitFooterBtnTexts = function(){
+    try {
+      [[btnRect, btnText], [ratingRect, ratingText], themeParts ? [themeParts.rect, themeParts.text] : null].forEach(p => {
+        if (!p) return;
+        const rc = p[0], tx = p[1], rw = parseFloat(rc.getAttribute('width')) || 0;
+        const base = Math.round(parseFloat(tx.dataset.fs0 || tx.getAttribute('font-size')));
+        if (!tx.dataset.fs0) tx.dataset.fs0 = base;
+        tx.setAttribute('font-size', tx.dataset.fs0);
+        const L = tx.getComputedTextLength();
+        const room = rw - 14;   // هامش 7 من كل جهة (وحدات الرسمة)
+        if (L > room && L > 0) tx.setAttribute('font-size', Math.max(8, Math.floor(parseFloat(tx.dataset.fs0) * room / L)));
+      });
+    } catch(e) {}
+  };
+  window.fitFooterBtnTexts();
+  [300, 1000, 2500].forEach(t => setTimeout(window.fitFooterBtnTexts, t));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.fitFooterBtnTexts());
 
   // تعويض مباشر ومبسّط لوضعي اليمين واليسار بالإنجليزي (كل وضع له قيمة منفصلة، حسب الاختبار الفعلي)
   if (window.oudLanguage === 'en') {
@@ -11824,7 +11844,12 @@ function filterRoots() {
     const outer = sb ? (onRight ? sb.right : sb.left) : (onRight ? b.right : b.left);
     // المفضلة تأخذ أقصى الصف (محاذية لنهاية الأورغ)
     imp('width', Wf + 'px'); imp('height', Hs + 'px');
-    imp('left', (onRight ? outer - Wf : outer) + 'px'); imp('right', 'auto'); imp('top', (yC - Hs / 2) + 'px');
+    // المفضلة تتحرك مع الرسمة (مثل الميكروفون): داخل الغلاف وبإحداثياته، لا ثابتة على الشاشة (سحب الآيباد)
+    const wrap = document.querySelector('.shared-oud-wrapper');
+    if (wrap && fb.parentNode !== wrap) wrap.appendChild(fb);
+    const wrr = wrap ? wrap.getBoundingClientRect() : { left: 0, top: 0 };
+    imp('position', wrap ? 'absolute' : 'fixed');
+    imp('left', ((onRight ? outer - Wf : outer) - wrr.left) + 'px'); imp('right', 'auto'); imp('top', (yC - Hs / 2 - wrr.top) + 'px');
     imp('font-size', px + 'px'); imp('border-radius', R * sh + 'px'); imp('border-width', Math.max(1, 2 * k) + 'px');
     const cs = getComputedStyle(hr), ts = getComputedStyle(ht);
     imp('background', cs.fill); imp('border-color', cs.stroke); imp('color', ts.fill);
