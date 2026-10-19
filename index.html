@@ -11804,12 +11804,13 @@ function filterRoots() {
     const phone = innerWidth <= 600 && innerHeight > innerWidth;   // تكبير أزرار الصف وتوحيدها مع خط التذييل: للجوال العمودي فقط
     let sw = 1, sh = 1, Ws, Hs, px;
     if (phone) {
-      sw = Math.min(1.5, Math.max(1, (emMax * target + 8) / baseW)); sh = Math.min(1.35, Math.max(1, (2.7 * target + 4) / baseH));
-      Ws = baseW * sw; Hs = baseH * sh; px = Math.min(target, (Hs - 4) / 2.7, (Ws - 8) / emMax);
+      // الجوال العمودي: أحجام الأزرار الأصلية، والخط يكبر قليلاً فقط بقدر ما تتسع الأزرار
+      Ws = baseW; Hs = baseH; const emHS = Math.max(em(ht.textContent), em(strWord)) / 1.1; px = Math.min(target * 1.25, (Ws - 3) / emHS, (Hs - 2) / 2.7);
     } else {
       // الكمبيوتر/التابلت: كل شيء بحجمه الأصلي؛ المفضلة بمقاس النغمة وخطها
       Ws = (nr && nr.width > 0) ? nr.width : baseW; Hs = (nr && nr.height > 0) ? nr.height : baseH;
-      px = (nb ? parseFloat(getComputedStyle(nb).fontSize) : 0) || (parseFloat(ht.dataset.f0) || 24) * ctm.a;
+      px = parseFloat(getComputedStyle(ht).fontSize) * ctm.a;   // خط المفضلة = خط «يمين/يسار» بالضبط
+      if (!(px > 0)) px = (parseFloat(ht.dataset.f0) || 24) * ctm.a;
     }
     const Wf = Math.max(Ws, favEm * px + 12);               // المفضلة كلمة واحدة: عرضها يكفي نصها
     const dir = onRight ? -1 : 1;
