@@ -11797,6 +11797,39 @@ function filterRoots() {
   setInterval(place, 1000);
   place();
 })();
+// ===== حرف المقام (مثل «دو ( محط المقام )»): يتوسط الشاشة بحاوية ملوّنة، على خط صف الأزرار =====
+(function(){
+  const label = document.getElementById('arHarfLabel'); if (!label) return;
+  function pos() {
+    if (label.style.display === 'none' || !window.isArabicMode) return;
+    const fb = document.getElementById('favBtn'), wrapper = document.querySelector('.shared-oud-wrapper');
+    if (!fb || !wrapper) return;
+    const fr = fb.getBoundingClientRect(); if (!fr.width) return;
+    const wr = wrapper.getBoundingClientRect(), cx = innerWidth / 2;
+    // مظهر الحاوية: نفس لون ونمط شريط «أبعاد المقام» (يتبع الوضع الداكن تلقائياً)
+    const ref = document.getElementById('maqamIntervalsBtn'), rcs = ref ? getComputedStyle(ref) : null;
+    const st = label.style, imp = (k, v) => st.setProperty(k, v, 'important');
+    imp('background', rcs && rcs.backgroundColor && rcs.backgroundColor !== 'rgba(0, 0, 0, 0)' ? rcs.backgroundColor : '#fff');
+    imp('border', '1.5px solid ' + (rcs && rcs.borderTopColor ? rcs.borderTopColor : '#3ab4e8'));
+    imp('border-radius', '999px'); imp('padding', '5px 16px'); imp('box-sizing', 'border-box'); imp('text-align', 'center');
+    // أقرب عائق يمين/يسار المنتصف على الصف نفسه
+    const ids = ['micVerifyHtmlBtn', 'noteModeToggleBtn', 'favBtn'];
+    const rects = ids.map(i => document.getElementById(i)).filter(Boolean).map(e => e.getBoundingClientRect());
+    if (!organMode) ['#handToggleBtn rect', '#stringCountBtn rect'].forEach(q => { const e = document.querySelector(q); if (e) rects.push(e.getBoundingClientRect()); });
+    let lim = Infinity;
+    rects.forEach(r => { if (!r.width) return; if (r.right <= cx) lim = Math.min(lim, cx - r.right); else if (r.left >= cx) lim = Math.min(lim, r.left - cx); });
+    const maxW = isFinite(lim) ? 2 * (lim - 10) : Infinity;
+    st.removeProperty('font-size');
+    st.left = (cx - wr.left) + 'px'; st.top = (fr.top + fr.height / 2 - wr.top) + 'px'; st.transform = 'translate(-50%, -50%)';
+    const w = label.getBoundingClientRect().width;
+    if (maxW > 0 && w > maxW) { const fs = parseFloat(getComputedStyle(label).fontSize); imp('font-size', Math.max(fs * 0.45, fs * maxW / w) + 'px'); }
+  }
+  try { Object.defineProperty(window, 'syncArHarfLabelPosition', { get: () => pos, set: () => {}, configurable: true }); } catch (e) {}
+  window.addEventListener('resize', pos);
+  [300, 900, 1600, 3200].forEach(t => setTimeout(pos, t));
+  setInterval(pos, 700);
+  pos();
+})();
 })();
 </script>
 </body>
