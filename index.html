@@ -11529,7 +11529,7 @@ function doRender() {
     const bd = k => b0 + k * cw;
     const t = mk('text', { x: px + 222, y: py + 10, 'font-size': 8.5, fill: '#9aa0a6', 'font-family': 'Arial,sans-serif', 'font-weight': 700, 'letter-spacing': 1.2, direction: 'ltr', 'text-anchor': 'middle' }, pl);
     t.textContent = 'SCALE SETTING';
-    const ln = (d) => mk('path', { d, fill: 'none', stroke: LC, 'stroke-width': 1 }, pl);
+    const ln = (d) => mk('path', { d, fill: 'none', stroke: LC, 'stroke-width': 1.4, 'stroke-linecap': 'round' }, pl);
     ln(`M${bd(0)},${py + 14} H${bd(12)}`);
     // الخط السفلي الموحّد للمجموعتين (C–E) و(F–B)
     // الخط السفلي: ينقسم عند كل صعود (إلى إطار الأسود أو الحافة) بالتقاء بزاوية صغيرة مثل الفاصل بين المي والفا
@@ -11553,8 +11553,8 @@ function doRender() {
       mk('circle', { cx, cy: py + 25, r: 4.5, fill: on ? '#ff3b30' : '#5a1717', stroke: '#000', 'stroke-width': .5 }, g);
       mk('rect', {
         x: cx - (sharp ? 12.5 : 12), y: sharp ? py + 45 : py + 56, width: sharp ? 25 : 24, height: sharp ? 22 : 24, rx: 4,
-        fill: sharp ? '#55585c' : '#e9e5da',
-        stroke: on ? '#ff9f1c' : (sharp ? '#2a2c2e' : '#b8b2a2'), 'stroke-width': on ? 2.2 : 1
+        fill: sharp ? '#55585c' : '#fbfaf4',
+        stroke: on ? '#ff9f1c' : (sharp ? '#0b0c0d' : '#8f8a78'), 'stroke-width': on ? 2.4 : 1.6
       }, g);
     }
   }
