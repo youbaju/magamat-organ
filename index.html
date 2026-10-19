@@ -11772,6 +11772,13 @@ function filterRoots() {
     restore(hg); restore(sg);
     if (hg) hg.style.transform = ''; if (sg) sg.style.transform = '';
     keep(hg); keep(sg);
+    // المقامات الغربية: لا مفضلة هنا — تبقى بقية الأزرار في أماكنها الأصلية (لا تتراكب مع أزرار أنواع المقامات)
+    if (window.isArabicMode === false) {
+      fb.style.setProperty('display', 'none', 'important');
+      [document.getElementById('noteModeToggleBtn'), document.getElementById('micVerifyHtmlBtn')].forEach(e => { if (e) e.style.removeProperty('translate'); });
+      return;
+    }
+    fb.style.removeProperty('display');
     const b = hr.getBoundingClientRect(); if (!b.width) return;
     const sr = document.querySelector('#stringCountBtn rect'), sbr = sr ? sr.getBoundingClientRect() : null, sb = (sbr && sbr.width) ? sbr : null;
     let gap = 8;
