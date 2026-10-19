@@ -11754,59 +11754,99 @@ function filterRoots() {
     'body:not(.hand-left-mode) #menuToggle{right:10px !important;left:auto !important}body.hand-left-mode #menuToggle{left:10px !important;right:auto !important}';
   document.head.appendChild(st);
   const imp = (k, v) => fb.style.setProperty(k, v, 'important');
+  // يعيد تعديلاتنا السابقة على مستطيل/نصوص زر عود (لنقيس دائماً من الأصل)
+  function restore(g) {
+    if (!g) return;
+    g.querySelectorAll('rect').forEach(r => { if (r.dataset.w0) { r.setAttribute('x', r.dataset.x0); r.setAttribute('y', r.dataset.y0); r.setAttribute('width', r.dataset.w0); r.setAttribute('height', r.dataset.h0); } });
+    g.querySelectorAll('text').forEach(t => { if (t.dataset.f0) { t.setAttribute('font-size', t.dataset.f0); t.setAttribute('y', t.dataset.ty0); } });
+  }
+  function keep(g) {
+    if (!g) return;
+    g.querySelectorAll('rect').forEach(r => { if (!r.dataset.w0) { r.dataset.x0 = r.getAttribute('x'); r.dataset.y0 = r.getAttribute('y'); r.dataset.w0 = r.getAttribute('width'); r.dataset.h0 = r.getAttribute('height'); } });
+    g.querySelectorAll('text').forEach(t => { if (!t.dataset.f0) { t.dataset.f0 = t.getAttribute('font-size'); t.dataset.ty0 = t.getAttribute('y'); } });
+  }
   function place() {
     const hg = document.getElementById('handToggleBtn'), sg = document.getElementById('stringCountBtn');
     const hr = document.querySelector('#handToggleBtn rect'), ht = document.querySelector('#handToggleBtn text');
     if (!hr || !ht) return;
-    // نقيس المواضع الأصلية أولاً (بدون أي إزاحة سابقة منا)
+    restore(hg); restore(sg);
     if (hg) hg.style.transform = ''; if (sg) sg.style.transform = '';
+    keep(hg); keep(sg);
     const b = hr.getBoundingClientRect(); if (!b.width) return;
-    const sr = document.querySelector('#stringCountBtn rect'), sb = (sr && sr.getBoundingClientRect().width) ? sr.getBoundingClientRect() : null;
+    const sr = document.querySelector('#stringCountBtn rect'), sbr = sr ? sr.getBoundingClientRect() : null, sb = (sbr && sbr.width) ? sbr : null;
     let gap = 8;
     if (sb) { const g = Math.min(Math.abs(sb.left - b.right), Math.abs(b.left - sb.right)); if (g > 0 && g < 60) gap = g; }
     const k = b.height / (parseFloat(hr.getAttribute('height')) || b.height);
     const onRight = (b.left + b.width / 2) > innerWidth / 2;
-    // الحجم والخط مطابقان لزر «نغمة مستمرة/قصيرة» (إن وُجد)
     const nb = document.getElementById('noteModeToggleBtn'), mb = document.getElementById('micVerifyHtmlBtn');
-    if (nb) nb.style.translate = ''; if (mb) mb.style.translate = '';
+    const nb0 = null;
+    const ovr0 = document.getElementById('organTopBtnOvr'); if (ovr0) ovr0.remove();
+    if (nb) nb.style.removeProperty('translate'); if (mb) mb.style.removeProperty('translate');
     const nr = nb ? nb.getBoundingClientRect() : null;
-    let W = b.width * 1.5, H = b.height, F = (parseFloat(ht.getAttribute('font-size')) || 24) * k * 0.9, R = (parseFloat(hr.getAttribute('rx')) || 16) * k;
-    if (nr && nr.width > 0) { const ncs = getComputedStyle(nb); W = nr.width; H = nr.height; F = parseFloat(ncs.fontSize) || F; R = parseFloat(ncs.borderTopLeftRadius) || R; }
-    // المفضلة تأخذ أقصى الصف (مكان زر عدد الأوتار، محاذية لنهاية الأورغ)، وأزرار العود تنزاح للداخل بقدر عرضها
-    // مرجع الصف: مركز زر يمين/يسار الأصلي (فوق أرقام الفريتات)؛ والميكروفون والنغمة المستمرة/القصيرة يُرفعان ليحاذياه
-    const yC = b.top + b.height / 2;
-    const outer = sb ? (onRight ? sb.right : sb.left) : (onRight ? b.right : b.left);
-    imp('width', W + 'px'); imp('height', H + 'px');
-    imp('left', (onRight ? outer - W : outer) + 'px'); imp('right', 'auto'); imp('top', (yC - H / 2) + 'px');
-    imp('font-size', F + 'px'); imp('border-radius', R + 'px'); imp('border-width', Math.max(1, 2 * k) + 'px');
-    const cs = getComputedStyle(hr), ts = getComputedStyle(ht);
-    imp('background', cs.fill); imp('border-color', cs.stroke); imp('color', ts.fill);
+    const ctm = svg.getScreenCTM(); if (!ctm) return;
+    const hyp = Math.hypot(ctm.a, ctm.b);
+    const baseW = b.width, baseH = b.height;               // أبعاد زر يمين/يسار الأصلية على الشاشة (المرجع لكل أزرار الصف)
+    const R = (parseFloat(hr.getAttribute('rx')) || 16) * k;
+    const yC = b.top + b.height / 2;                       // مرجع الصف: مركز زر يمين/يسار الأصلي (فوق أرقام الفريتات)
     const txt = window.oudLanguage === 'en' ? 'Favorites' : 'المفضلة';
     if (fb.textContent !== txt) fb.textContent = txt;
-    // توحيد خط (المفضلة) و(نغمة مستمرة/قصيرة) مع خط زر يمين/يسار: نفس الحجم على الشاشة، مع خفض بسيط فقط إن لم يتسع النص
-    (function(){
-      const ctmF = svg.getScreenCTM(); if (!ctmF) return;
-      if (!ht.dataset.f0) ht.dataset.f0 = ht.getAttribute('font-size');
-      const handPx = (parseFloat(ht.dataset.f0) || 24) * ctmF.a;
-      let px = handPx;
-      if (nb && nr && nr.width > 0) {
-        const cv = place._cv || (place._cv = document.createElement('canvas').getContext('2d'));
-        const words = window.oudLanguage === 'en' ? ['Sustained', 'Short', 'note'] : ['نغمة', 'مستمرة', 'قصيرة'];
-        cv.font = '800 100px Cairo, Arial, sans-serif';
-        const em = Math.max.apply(null, words.map(w => cv.measureText(w).width)) / 100 * 1.1;
-        const favEm = cv.measureText(fb.textContent).width / 100 * 1.1;
-        const availW = nr.width - 12;
-        px = Math.min(px, availW / em, (W - 12) / favEm, (nr.height - 4) / 2.1);
-      }
-      imp('font-size', px + 'px');
-      ht.setAttribute('font-size', String(Math.min(parseFloat(ht.dataset.f0) || 24, px / ctmF.a))); // يمين/يسار يتبع نفس الحجم إن اضطررنا للتصغير (الإنجليزية)
-      if (nb) nb.style.setProperty('font-size', px + 'px', 'important');
-    })();
-    // رفع الميكروفون والنغمة المستمرة/القصيرة لمحاذاة صف المفضلة (بخاصية translate المستقلة عن transform)
-    if (nr && nr.width > 0) { const dy = yC - (nr.top + nr.height / 2); [nb, mb].forEach(e => { if (e) e.style.translate = '0 ' + dy + 'px'; }); }
+    // الخط المستهدف = خط أزرار التذييل (تواصل/تقييم/فاتح) لأنه الأوضح؛ نكبّر الأزرار فقط بقدر ما يحتاج النص
+    const ctEl = document.querySelector('#svgContactBtn text');
+    let target = ctEl ? (parseFloat(ctEl.getAttribute('font-size')) || 0) * ctm.a : 0;
+    if (!(target > 0)) target = (parseFloat(ht.dataset.f0) || 24) * ctm.a;
+    const cv = place._cv || (place._cv = document.createElement('canvas').getContext('2d'));
+    cv.font = '800 100px Cairo, Arial, sans-serif';
+    const em = s => cv.measureText(s).width / 100 * 1.1;
+    const words = window.oudLanguage === 'en' ? ['Sustained', 'Short', 'note'] : ['نغمة', 'مستمرة', 'قصيرة'];
+    const strWord = window.oudLanguage === 'en' ? 'Strings' : 'أوتار';
+    const emMax = Math.max.apply(null, words.map(em).concat([em(ht.textContent), em(strWord)]));
+    const favEm = em(txt);
+    const phone = innerWidth <= 600 && innerHeight > innerWidth;   // تكبير أزرار الصف وتوحيدها مع خط التذييل: للجوال العمودي فقط
+    let sw = 1, sh = 1, Ws, Hs, px;
+    if (phone) {
+      sw = Math.min(1.5, Math.max(1, (emMax * target + 8) / baseW)); sh = Math.min(1.35, Math.max(1, (2.7 * target + 4) / baseH));
+      Ws = baseW * sw; Hs = baseH * sh; px = Math.min(target, (Hs - 4) / 2.7, (Ws - 8) / emMax);
+    } else {
+      // الكمبيوتر/التابلت: كل شيء بحجمه الأصلي؛ المفضلة بمقاس النغمة وخطها
+      Ws = (nr && nr.width > 0) ? nr.width : baseW; Hs = (nr && nr.height > 0) ? nr.height : baseH;
+      px = (nb ? parseFloat(getComputedStyle(nb).fontSize) : 0) || (parseFloat(ht.dataset.f0) || 24) * ctm.a;
+    }
+    const Wf = Math.max(Ws, favEm * px + 12);               // المفضلة كلمة واحدة: عرضها يكفي نصها
+    const dir = onRight ? -1 : 1;
+    const outer = sb ? (onRight ? sb.right : sb.left) : (onRight ? b.right : b.left);
+    // المفضلة تأخذ أقصى الصف (محاذية لنهاية الأورغ)
+    imp('width', Wf + 'px'); imp('height', Hs + 'px');
+    imp('left', (onRight ? outer - Wf : outer) + 'px'); imp('right', 'auto'); imp('top', (yC - Hs / 2) + 'px');
+    imp('font-size', px + 'px'); imp('border-radius', R * sh + 'px'); imp('border-width', Math.max(1, 2 * k) + 'px');
+    const cs = getComputedStyle(hr), ts = getComputedStyle(ht);
+    imp('background', cs.fill); imp('border-color', cs.stroke); imp('color', ts.fill);
+    // الميكروفون والنغمة المستمرة/القصيرة: نفس الحجم والخط ومحاذاة الصف
+    // الميكروفون والنغمة: لا يُمسّان إطلاقاً (حجمهما وموضعهما الأصلي)
     if (!organMode) {
-      const ctm = svg.getScreenCTM(), dx = (W + gap) / (ctm ? ctm.a : 1) * (onRight ? -1 : 1);
-      [hg, sg].forEach(g => { if (g) g.style.transform = 'translate(' + dx + 'px,0)'; });
+      // أزرار العود: تكبير مستطيلاتها ونصوصها حول مراكزها، ثم تتابعها للداخل بعد المفضلة بنفس الفراغ
+      const grow = (g, box) => {
+        const cy = (+g.querySelector('rect').dataset.y0) + (+g.querySelector('rect').dataset.h0) / 2;
+        g.querySelectorAll('rect').forEach(r => {
+          const x0 = +r.dataset.x0, y0 = +r.dataset.y0, w0 = +r.dataset.w0, h0 = +r.dataset.h0, w1 = w0 * sw, h1 = h0 * sh;
+          r.setAttribute('x', x0 - (w1 - w0) / 2); r.setAttribute('width', w1); r.setAttribute('y', y0 - (h1 - h0) / 2); r.setAttribute('height', h1);
+        });
+        const ts2 = Array.from(g.querySelectorAll('text')).sort((p, q) => (+q.dataset.f0) - (+p.dataset.f0));
+        ts2.forEach((t, i) => {
+          const f0 = +t.dataset.f0; const isNum = g === sg && ts2.length > 1 && i === 0;
+          const f1 = (isNum ? px * 1.37 : px) / ctm.a;
+          t.setAttribute('font-size', String(Math.min(f1, f1))); const ty0 = +t.dataset.ty0;
+          t.setAttribute('y', String(cy + (ty0 - cy) * (f1 / f0)));
+        });
+      };
+      if (phone) { grow(hg, b); if (sg && sb) grow(sg, sb); }
+      let edge = onRight ? outer - Wf : outer + Wf;
+      [sb && sg ? { g: sg, box: sb } : null, { g: hg, box: b }].forEach(o => {
+        if (!o) return;
+        const ws = o.box.width * sw;
+        let c; if (onRight) { const r = edge - gap; c = r - ws / 2; edge = r - ws; } else { const l = edge + gap; c = l + ws / 2; edge = l + ws; }
+        const dxU = (c - (o.box.left + o.box.width / 2)) / ctm.a, dyU = (yC - (o.box.top + o.box.height / 2)) / ctm.d;
+        o.g.style.transform = 'translate(' + dxU + 'px,' + dyU + 'px)';
+      });
     }
   }
   let _pq = 0;
