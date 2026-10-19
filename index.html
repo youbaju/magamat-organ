@@ -11821,7 +11821,8 @@ function filterRoots() {
     const cs = getComputedStyle(hr), ts = getComputedStyle(ht);
     imp('background', cs.fill); imp('border-color', cs.stroke); imp('color', ts.fill);
     // الميكروفون والنغمة المستمرة/القصيرة: نفس الحجم والخط ومحاذاة الصف
-    // الميكروفون والنغمة: لا يُمسّان إطلاقاً (حجمهما وموضعهما الأصلي)
+    // الميكروفون والنغمة: حجمهما أصلي؛ نرفعهما رأسياً فقط لمحاذاة صف يمين/المفضلة
+    [nb, mb].forEach(e => { if (!e) return; const r = e.getBoundingClientRect(); if (r.width > 0) e.style.translate = '0 ' + (yC - (r.top + r.height / 2)) + 'px'; });
     if (!organMode) {
       // أزرار العود: تكبير مستطيلاتها ونصوصها حول مراكزها، ثم تتابعها للداخل بعد المفضلة بنفس الفراغ
       const grow = (g, box) => {
