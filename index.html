@@ -6373,8 +6373,8 @@ function drawOudScale(root, scaleType, direction, stepDirections, currentIndex){
         const target = liveEl || rectEl;
         // نلتقط اللون الفعلي الظاهر حالياً وقت الضغط (مو لون وقت الرسم بس) — نفس إصلاح
         // مشكلة "تحقق من عزفي" اللي تخلي النغمة ترجع للون رسمها الأصلي بدل اللون الحالي الصحيح
-        target._pressOrigFill = target.getAttribute('fill') || origFillForToggle;
-        target._pressOrigStroke = target.getAttribute('stroke') || origStrokeForToggle;
+        if (target.getAttribute('fill') !== '#d64545' || !target._pressOrigFill) target._pressOrigFill = target.getAttribute('fill') || origFillForToggle;
+        if (target.getAttribute('fill') !== '#d64545' || !target._pressOrigStroke) target._pressOrigStroke = target.getAttribute('stroke') || origStrokeForToggle;
         target.setAttribute('fill', '#d64545');
         target.setAttribute('stroke', '#a82f2f');
         if (typeof window.vibrateString === 'function') window.vibrateString(pos.string);
@@ -8735,8 +8735,8 @@ window.wxResume = wxResume;
             // نلتقط اللون الفعلي الظاهر حالياً وقت الضغط (مو لون وقت الرسم بس) — يضمن الرجوع
             // للون الصحيح حتى لو تغيّر خارجياً بعد الرسم (مثلاً ميزة "تحقق من عزفي" رجّعته
             // أزرق بعد الإلغاء، بينما لون الرسم الأصلي كان أحمر لأنها كانت "النغمة الحالية")
-            target._pressOrigFill = target.getAttribute('fill') || origFillAr;
-            target._pressOrigStroke = target.getAttribute('stroke') || origStrokeAr;
+            if (target.getAttribute('fill') !== '#d64545' || !target._pressOrigFill) target._pressOrigFill = target.getAttribute('fill') || origFillAr;
+            if (target.getAttribute('fill') !== '#d64545' || !target._pressOrigStroke) target._pressOrigStroke = target.getAttribute('stroke') || origStrokeAr;
             target.setAttribute('fill', '#d64545');
             target.setAttribute('stroke', '#a82f2f');
             if (typeof window.vibrateString === 'function') window.vibrateString(vibStrIdx);
@@ -11609,7 +11609,8 @@ function doRender() {
     const up = () => setTimeout(() => g.classList.remove('pressed'), 120);
     g.addEventListener('pointerdown', down);
     ['pointerup', 'pointerleave', 'pointercancel'].forEach(e => g.addEventListener(e, up));
-    g.addEventListener('click', () => { nt.rect.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
+    // الصوت عند «الضغط» لا عند «الرفع»: الرسم يُعاد أثناء الإضاءة فكان الكليك السريع يضيع إذا استُبدل المفتاح بين الضغط والرفع
+    g.addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse' && e.button !== 0) return; nt.rect.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
   }
   function fillFor(nt) { if (!nt) return null; if (nt.fill === '#ffe100') return 'url(#orYel)'; if (nt.fill === '#1B7A3D') return 'url(#orGrn)'; return nt.cur ? 'url(#orCur)' : 'url(#orLit)'; }
   function strokeFor(nt) { if (nt.fill === '#ffe100') return '#6b5300'; if (nt.fill === '#1B7A3D') return '#04230f'; return nt.cur ? '#5e1414' : '#06214a'; }
