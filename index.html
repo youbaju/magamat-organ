@@ -11767,18 +11767,24 @@ function filterRoots() {
     const k = b.height / (parseFloat(hr.getAttribute('height')) || b.height);
     const onRight = (b.left + b.width / 2) > innerWidth / 2;
     // الحجم والخط مطابقان لزر «نغمة مستمرة/قصيرة» (إن وُجد)
-    const nb = document.getElementById('noteModeToggleBtn'), nr = nb ? nb.getBoundingClientRect() : null;
+    const nb = document.getElementById('noteModeToggleBtn'), mb = document.getElementById('micVerifyHtmlBtn');
+    if (nb) nb.style.translate = ''; if (mb) mb.style.translate = '';
+    const nr = nb ? nb.getBoundingClientRect() : null;
     let W = b.width * 1.5, H = b.height, F = (parseFloat(ht.getAttribute('font-size')) || 24) * k * 0.9, R = (parseFloat(hr.getAttribute('rx')) || 16) * k;
     if (nr && nr.width > 0) { const ncs = getComputedStyle(nb); W = nr.width; H = nr.height; F = parseFloat(ncs.fontSize) || F; R = parseFloat(ncs.borderTopLeftRadius) || R; }
     // المفضلة تأخذ أقصى الصف (مكان زر عدد الأوتار، محاذية لنهاية الأورغ)، وأزرار العود تنزاح للداخل بقدر عرضها
+    // مرجع الصف: مركز زر يمين/يسار الأصلي (فوق أرقام الفريتات)؛ والميكروفون والنغمة المستمرة/القصيرة يُرفعان ليحاذياه
+    const yC = b.top + b.height / 2;
     const outer = sb ? (onRight ? sb.right : sb.left) : (onRight ? b.right : b.left);
     imp('width', W + 'px'); imp('height', H + 'px');
-    imp('left', (onRight ? outer - W : outer) + 'px'); imp('right', 'auto'); imp('top', (b.top + b.height / 2 - H / 2) + 'px');
+    imp('left', (onRight ? outer - W : outer) + 'px'); imp('right', 'auto'); imp('top', (yC - H / 2) + 'px');
     imp('font-size', F + 'px'); imp('border-radius', R + 'px'); imp('border-width', Math.max(1, 2 * k) + 'px');
     const cs = getComputedStyle(hr), ts = getComputedStyle(ht);
     imp('background', cs.fill); imp('border-color', cs.stroke); imp('color', ts.fill);
     const txt = window.oudLanguage === 'en' ? 'Favorites' : 'المفضلة';
     if (fb.textContent !== txt) fb.textContent = txt;
+    // رفع الميكروفون والنغمة المستمرة/القصيرة لمحاذاة صف المفضلة (بخاصية translate المستقلة عن transform)
+    if (nr && nr.width > 0) { const dy = yC - (nr.top + nr.height / 2); [nb, mb].forEach(e => { if (e) e.style.translate = '0 ' + dy + 'px'; }); }
     if (!organMode) {
       const ctm = svg.getScreenCTM(), dx = (W + gap) / (ctm ? ctm.a : 1) * (onRight ? -1 : 1);
       [hg, sg].forEach(g => { if (g) g.style.transform = 'translate(' + dx + 'px,0)'; });
