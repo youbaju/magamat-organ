@@ -11783,6 +11783,25 @@ function filterRoots() {
     imp('background', cs.fill); imp('border-color', cs.stroke); imp('color', ts.fill);
     const txt = window.oudLanguage === 'en' ? 'Favorites' : 'المفضلة';
     if (fb.textContent !== txt) fb.textContent = txt;
+    // توحيد خط (المفضلة) و(نغمة مستمرة/قصيرة) مع خط زر يمين/يسار: نفس الحجم على الشاشة، مع خفض بسيط فقط إن لم يتسع النص
+    (function(){
+      const ctmF = svg.getScreenCTM(); if (!ctmF) return;
+      if (!ht.dataset.f0) ht.dataset.f0 = ht.getAttribute('font-size');
+      const handPx = (parseFloat(ht.dataset.f0) || 24) * ctmF.a;
+      let px = handPx;
+      if (nb && nr && nr.width > 0) {
+        const cv = place._cv || (place._cv = document.createElement('canvas').getContext('2d'));
+        const words = window.oudLanguage === 'en' ? ['Sustained', 'Short', 'note'] : ['نغمة', 'مستمرة', 'قصيرة'];
+        cv.font = '800 100px Cairo, Arial, sans-serif';
+        const em = Math.max.apply(null, words.map(w => cv.measureText(w).width)) / 100 * 1.1;
+        const favEm = cv.measureText(fb.textContent).width / 100 * 1.1;
+        const availW = nr.width - 12;
+        px = Math.min(px, availW / em, (W - 12) / favEm, (nr.height - 4) / 2.1);
+      }
+      imp('font-size', px + 'px');
+      ht.setAttribute('font-size', String(Math.min(parseFloat(ht.dataset.f0) || 24, px / ctmF.a))); // يمين/يسار يتبع نفس الحجم إن اضطررنا للتصغير (الإنجليزية)
+      if (nb) nb.style.setProperty('font-size', px + 'px', 'important');
+    })();
     // رفع الميكروفون والنغمة المستمرة/القصيرة لمحاذاة صف المفضلة (بخاصية translate المستقلة عن transform)
     if (nr && nr.width > 0) { const dy = yC - (nr.top + nr.height / 2); [nb, mb].forEach(e => { if (e) e.style.translate = '0 ' + dy + 'px'; }); }
     if (!organMode) {
