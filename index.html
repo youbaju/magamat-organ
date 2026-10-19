@@ -11518,6 +11518,7 @@ function render() {
   try { doRender(); } finally { busy = false; }
 }
 function doRender() {
+  if (!svgShown()) return;
   svg.classList.toggle('organ-mode', organMode);
   layer.style.display = organMode ? '' : 'none';
   placeToggle();
@@ -11675,7 +11676,9 @@ function svgBox(el) {
   const a = pt(r.left, r.top), c = pt(r.right, r.bottom);
   return { x1: Math.min(a.x, c.x), x2: Math.max(a.x, c.x), y1: Math.min(a.y, c.y), y2: Math.max(a.y, c.y) };
 }
+function svgShown() { const r = svg.getBoundingClientRect(); return r.width > 0 && r.height > 0 && !!svg.getScreenCTM(); }
 function placeToggle() {
+  if (!svgShown()) return;   // الرسمة مخفية (مثلاً صفحة تواصل مفتوحة): القياسات صفرية فلا نعيد الترتيب
   const lr = document.querySelector('#langToggleBtn rect'), hr = document.querySelector('#helpBtn rect');
   if (!lr) return;
   const L = svgBox(lr), H = hr ? svgBox(hr) : L;
@@ -11705,6 +11708,7 @@ tg.addEventListener('click', () => {
 
 // ===== توزيع أزرار التذييل تحت الأورغ =====
 function layoutFooter() {
+  if (!svgShown()) return;
   const f = document.getElementById('oudFooterGroup'); if (!f) return;
   const items = Array.from(f.children).filter(c => c.tagName === 'g');
   items.forEach(c => {
@@ -11745,6 +11749,7 @@ if (cb) new MutationObserver(() => { placeToggle(); layoutFooter(); }).observe(c
 const os = document.getElementById('oudStatic');
 if (os) new MutationObserver(() => { if (organMode) sched(); }).observe(os, { childList: true });
 placeToggle(); render();
+try { new ResizeObserver(() => { if (svgShown()) { placeToggle(); if (organMode) render(); else layoutFooter(); } }).observe(svg); } catch (e) {}
 setTimeout(() => { placeToggle(); render(); }, 600);
 window.addEventListener('load', () => { placeToggle(); render(); });
 
