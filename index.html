@@ -5406,7 +5406,7 @@ function buildOudStatic(){
   }));
   { // مقصّ برأس الزند (للهالة خلف أسماء الأوتار) بحجم الشكل البيج نفسه داخل الإطار الأسود
     const cd = el('clipPath', { id: 'nutHeadClip' });
-    cd.appendChild(el('polygon', { points: `${OUD.VISUAL_NUT_X + 3},${neckYTopAtNut + 3} ${NECK_JOINT_END_X - 3},${neckJointTopEndY + 3} ${NECK_JOINT_END_X - 3},${neckJointBottomEndY - 3} ${OUD.VISUAL_NUT_X + 3},${neckYBotAtNut - 3}` }));
+    cd.appendChild(el('polygon', { points: `${OUD.VISUAL_NUT_X + 6},${neckYTopAtNut + 5} ${NECK_JOINT_END_X - 6},${neckJointTopEndY + 5} ${NECK_JOINT_END_X - 6},${neckJointBottomEndY - 5} ${OUD.VISUAL_NUT_X + 6},${neckYBotAtNut - 5}` }));
     g2.appendChild(cd);
   }
   g2.appendChild(el('line', { x1:OUD.VISUAL_NUT_X,y1:neckYTopAtNut,x2:NECK_JOINT_END_X,y2:neckJointTopEndY, stroke:'#111','stroke-width':6,'stroke-linecap':'round' }));
@@ -5855,7 +5855,7 @@ function buildOudStatic(){
     const halo = t.cloneNode(true);
     halo.setAttribute('fill', 'none');
     halo.setAttribute('stroke', '#f3e2c7');
-    halo.setAttribute('stroke-width', '7');
+    halo.setAttribute('stroke-width', '4.5');
     halo.setAttribute('stroke-linejoin', 'round');
     halo.setAttribute('clip-path', 'url(#nutHeadClip)');
     g2.appendChild(halo);
