@@ -8031,10 +8031,7 @@ window.wxResume = wxResume;
       // نفس سلوك زر اختيار المقام وزر التبويبات بالضبط: أي ضغطة على زر المفضلة توقف فوراً
       // أي صوت شغال (سلّم عادي أو تمرين)، قبل ما نفتح القائمة المصغّرة
       if (typeof window.stopAllOudPlayback === 'function') window.stopAllOudPlayback();
-      // وبالعكس: نفس سلوك زر اختيار المقام اللي يخفي زر المفضلة وقت فتحه — هنا نخفي زر اختيار
-      // المقام وقت فتح قائمة المفضلة، عشان ما يظهرون مع بعض بنفس الوقت أبداً
-      const menuToggleEl = document.getElementById('menuToggle');
-      if (menuToggleEl) menuToggleEl.style.visibility = 'hidden';
+      // (كان يخفي هنا زر اختيار المقام لأن دائرة المفضلة كانت ملاصقة له؛ الآن المفضلة بصف الأزرار تحت فلا داعي)
       const isEn = window.oudLanguage === 'en';
       const btn = document.getElementById('favBtn');
       const rect = btn.getBoundingClientRect();
@@ -11429,7 +11426,7 @@ st.textContent = `
 #shared-oudSvg.organ-mode #chordHighlightLayer{visibility:hidden;pointer-events:none}
 #shared-oudSvg.organ-mode #oudFooterGroup,#shared-oudSvg.organ-mode #helpBtn{visibility:visible;pointer-events:auto}
 #shared-oudSvg.organ-mode #handToggleBtn,
-#shared-oudSvg.organ-mode #stringCountBtn{display:none}
+#shared-oudSvg.organ-mode #stringCountBtn{visibility:hidden;pointer-events:none}
 #organLayer .okey{cursor:pointer;transition:transform .06s}
 #organLayer .okey.off{cursor:default}
 svg#shared-oudSvg #organLayer .okey.off rect{pointer-events:none}
@@ -11748,6 +11745,51 @@ function filterRoots() {
   if (ms) ms.addEventListener('change', () => setTimeout(filterRoots, 0));
   document.querySelectorAll('input[name="maqam"]').forEach(r => r.addEventListener('change', () => setTimeout(filterRoots, 50)));
   setTimeout(filterRoots, 800); setTimeout(filterRoots, 2000);
+})();
+// ===== زر المفضلة: بجانب زر يمين/يسار في الصف نفسه، مكتوب عليه «المفضلة» =====
+(function(){
+  const fb = document.getElementById('favBtn'); if (!fb) return;
+  const st = document.createElement('style');
+  st.textContent = '#favBtn{border-radius:16px !important;max-width:none !important;padding:0 !important;box-shadow:none !important;font-family:"Cairo","Segoe UI",Tahoma,sans-serif !important;font-weight:800 !important;white-space:nowrap !important;line-height:1 !important}' +
+    'body:not(.hand-left-mode) #menuToggle{right:10px !important;left:auto !important}body.hand-left-mode #menuToggle{left:10px !important;right:auto !important}';
+  document.head.appendChild(st);
+  const imp = (k, v) => fb.style.setProperty(k, v, 'important');
+  function place() {
+    const hg = document.getElementById('handToggleBtn'), sg = document.getElementById('stringCountBtn');
+    const hr = document.querySelector('#handToggleBtn rect'), ht = document.querySelector('#handToggleBtn text');
+    if (!hr || !ht) return;
+    // نقيس المواضع الأصلية أولاً (بدون أي إزاحة سابقة منا)
+    if (hg) hg.style.transform = ''; if (sg) sg.style.transform = '';
+    const b = hr.getBoundingClientRect(); if (!b.width) return;
+    const sr = document.querySelector('#stringCountBtn rect'), sb = (sr && sr.getBoundingClientRect().width) ? sr.getBoundingClientRect() : null;
+    let gap = 8;
+    if (sb) { const g = Math.min(Math.abs(sb.left - b.right), Math.abs(b.left - sb.right)); if (g > 0 && g < 60) gap = g; }
+    const k = b.height / (parseFloat(hr.getAttribute('height')) || b.height);
+    const onRight = (b.left + b.width / 2) > innerWidth / 2;
+    // الحجم والخط مطابقان لزر «نغمة مستمرة/قصيرة» (إن وُجد)
+    const nb = document.getElementById('noteModeToggleBtn'), nr = nb ? nb.getBoundingClientRect() : null;
+    let W = b.width * 1.5, H = b.height, F = (parseFloat(ht.getAttribute('font-size')) || 24) * k * 0.9, R = (parseFloat(hr.getAttribute('rx')) || 16) * k;
+    if (nr && nr.width > 0) { const ncs = getComputedStyle(nb); W = nr.width; H = nr.height; F = parseFloat(ncs.fontSize) || F; R = parseFloat(ncs.borderTopLeftRadius) || R; }
+    // المفضلة تأخذ أقصى الصف (مكان زر عدد الأوتار، محاذية لنهاية الأورغ)، وأزرار العود تنزاح للداخل بقدر عرضها
+    const outer = sb ? (onRight ? sb.right : sb.left) : (onRight ? b.right : b.left);
+    imp('width', W + 'px'); imp('height', H + 'px');
+    imp('left', (onRight ? outer - W : outer) + 'px'); imp('right', 'auto'); imp('top', (b.top + b.height / 2 - H / 2) + 'px');
+    imp('font-size', F + 'px'); imp('border-radius', R + 'px'); imp('border-width', Math.max(1, 2 * k) + 'px');
+    const cs = getComputedStyle(hr), ts = getComputedStyle(ht);
+    imp('background', cs.fill); imp('border-color', cs.stroke); imp('color', ts.fill);
+    const txt = window.oudLanguage === 'en' ? 'Favorites' : 'المفضلة';
+    if (fb.textContent !== txt) fb.textContent = txt;
+    if (!organMode) {
+      const ctm = svg.getScreenCTM(), dx = (W + gap) / (ctm ? ctm.a : 1) * (onRight ? -1 : 1);
+      [hg, sg].forEach(g => { if (g) g.style.transform = 'translate(' + dx + 'px,0)'; });
+    }
+  }
+  let _pq = 0;
+  new MutationObserver(() => { if (_pq) return; _pq = requestAnimationFrame(() => { _pq = 0; place(); }); }).observe(svg, { childList: true, subtree: true });
+  window.addEventListener('resize', place); window.addEventListener('orientationchange', () => setTimeout(place, 300));
+  [200, 800, 1500, 3000].forEach(t => setTimeout(place, t));
+  setInterval(place, 1000);
+  place();
 })();
 })();
 </script>
