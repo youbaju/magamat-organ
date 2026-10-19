@@ -6004,7 +6004,7 @@ function buildOudStatic(){
     'font-size':'40', 'font-weight':'800', fill:'#0a2f52'
   });
   const ratingWord = (window.oudLanguage === 'en') ? 'Rate' : 'تقييم';
-  ratingText.textContent = (window.oudLanguage === 'en') ? ('⭐ ' + ratingWord) : (ratingWord + ' ⭐');
+  ratingText.textContent = ratingWord;
   ratingG.appendChild(ratingRect);
   ratingG.appendChild(ratingText);
   oudFooterGroup.appendChild(ratingG);
@@ -6026,7 +6026,7 @@ function buildOudStatic(){
       const m = (window.oudTheme ? window.oudTheme.effective() : 'light');
       const w = isEn ? (m === 'dark' ? 'Dark' : 'Light') : (m === 'dark' ? 'داكن' : 'فاتح');
       const ic = (m === 'dark') ? '\uD83C\uDF19' : '\u2600\uFE0F';
-      themeText.textContent = isEn ? (ic + ' ' + w) : (w + ' ' + ic);
+      themeText.textContent = w;
       if (window.fitFooterBtnTexts) window.fitFooterBtnTexts();
     };
     refreshTheme();
@@ -10952,7 +10952,7 @@ document.getElementById('shared-playBtn').onclick = async function() {
     <div class="help-section" id="help-sec-ar-15">
       <h3>١٥. تقييم التطبيق</h3>
       <p>يمكن لأي زائر أن يقيّم التطبيق بنجوم من ١ إلى ٥، ويرى المعدل العام لكل التقييمات.</p>
-      <p>🔹 <strong>فتح صفحة التقييم:</strong> اضغط زر <strong>"⭐ تقييم"</strong> بأسفل الصفحة (بجانب زر "تواصل").</p>
+      <p>🔹 <strong>فتح صفحة التقييم:</strong> اضغط زر <strong>"تقييم"</strong> بأسفل الصفحة (بجانب زر "تواصل").</p>
       <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_17.jpg" alt="زر تقييم بأسفل الصفحة" style="width:130px;border-radius:6px;display:block;margin:8px auto;"/></div>
       <p>🔹 <strong>إرسال تقييمك:</strong> اضغط على عدد النجوم التي تعبّر عن رأيك (يمكنك تغيير اختيارك قبل التأكيد بالضغط على نجمة ثانية)، ثم اضغط زر <strong>"✓ تأكيد التقييم"</strong> لإرسال تقييمك فعلياً — وبهذه الطريقة لا يُحفظ تقييم بالخطأ في حال الضغط على نجمة خاطئة. بعد التأكيد تظهر رسالة شكر تأكيدية.</p>
       <p>🔹 <strong>تقييم واحد لكل زائر:</strong> بعد إرسال تقييمك، لا يمكنك إرسال تقييم آخر من نفس الجهاز/المتصفح (تصبح النجوم مغلقة)، لكي يبقى المعدل العام دقيقاً ويعكس رأي كل زائر مرة واحدة فقط.</p>
@@ -11041,7 +11041,7 @@ document.getElementById('shared-playBtn').onclick = async function() {
       <h3>٢٠. الوضع الليلي (مظهر التطبيق)</h3>
       <p>يتوفر للتطبيق مظهر داكن مريح للعين في الإضاءة المنخفضة، بجانب المظهر الفاتح.</p>
       <p>🔹 <strong>تلقائياً:</strong> يتبع التطبيق إعداد جهازك — داكن إذا كان جهازك على الوضع الداكن، وفاتح إذا كان على الوضع الفاتح.</p>
-      <p>🔹 <strong>زر المظهر:</strong> بأسفل الزند (بجانب زر "تقييم") ويعرض المظهر الحالي: <strong>"🌙 داكن"</strong> أو <strong>"☀️ فاتح"</strong>. اضغطه للتبديل بينهما في أي وقت، ويُحفظ اختيارك على جهازك.</p>
+      <p>🔹 <strong>زر المظهر:</strong> بأسفل الزند (بجانب زر "تقييم") ويعرض المظهر الحالي: <strong>"داكن"</strong> أو <strong>"فاتح"</strong>. اضغطه للتبديل بينهما في أي وقت، ويُحفظ اختيارك على جهازك.</p>
     </div>
 
     <div class="help-section" id="help-sec-ar-21">
@@ -11227,7 +11227,7 @@ document.getElementById('shared-playBtn').onclick = async function() {
     <div class="help-section" id="help-sec-en-15">
       <h3>15. Rating the App</h3>
       <p>Any visitor can rate the app from 1 to 5 stars, and see the overall average of all ratings.</p>
-      <p>🔹 <strong>Opening the rating page:</strong> Press the <strong>"⭐ Rate"</strong> button at the bottom of the page (beside the "Contact" button).</p>
+      <p>🔹 <strong>Opening the rating page:</strong> Press the <strong>"Rate"</strong> button at the bottom of the page (beside the "Contact" button).</p>
       <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_36.jpg" alt="Rate button at the bottom of the page" style="width:130px;border-radius:6px;display:block;margin:8px auto;"/></div>
       <p>🔹 <strong>Submitting your rating:</strong> Tap the number of stars that reflects your opinion (you can change your choice before confirming by tapping a different star), then press the <strong>"✓ Confirm Rating"</strong> button to actually submit it — this way a rating never gets saved by mistake if you tap the wrong star. A thank-you message appears after confirming.</p>
       <p>🔹 <strong>One rating per visitor:</strong> After submitting your rating, you can't submit another one from the same device/browser (the stars become locked), so the overall average stays accurate and reflects each visitor's opinion just once.</p>
@@ -11316,7 +11316,7 @@ document.getElementById('shared-playBtn').onclick = async function() {
       <h3>20. Dark mode (app appearance)</h3>
       <p>The app has a dark appearance that is easier on the eyes in low light, alongside the light appearance.</p>
       <p>🔹 <strong>Automatic:</strong> the app follows your device setting — dark if your device is in dark mode, light if it is in light mode.</p>
-      <p>🔹 <strong>Appearance button:</strong> below the fretboard (beside the "Rate" button) it shows the current appearance: <strong>"🌙 Dark"</strong> or <strong>"☀️ Light"</strong>. Tap it to switch between them at any time; your choice is saved on your device.</p>
+      <p>🔹 <strong>Appearance button:</strong> below the fretboard (beside the "Rate" button) it shows the current appearance: <strong>"Dark"</strong> or <strong>"Light"</strong>. Tap it to switch between them at any time; your choice is saved on your device.</p>
     </div>
 
     <div class="help-section" id="help-sec-en-21">
@@ -11477,7 +11477,7 @@ const gr = (id, c1, c2) => { const g = mk('linearGradient', { id, x1: 0, y1: 0, 
 gr('orChassis', '#4a4d52', '#25272a');
 gr('orLit', '#5b97ea', '#2b6fc9');
 gr('orCur', '#ef6a6a', '#d64545');
-gr('orWhite', '#fbf9f3', '#e6e2d6');
+gr('orWhite', '#ffffff', '#ececec');
 gr('orBlack', '#3a3c40', '#0f1012');
 gr('orYel', '#ffe970', '#ffd000');
 gr('orGrn', '#2fae5f', '#1B7A3D');
@@ -11573,7 +11573,7 @@ function doRender() {
       mk('circle', { cx, cy: py + 25, r: 4.5, fill: on ? '#ff3b30' : '#5a1717', stroke: '#000', 'stroke-width': .5 }, g);
       mk('rect', {
         x: cx - (sharp ? 12.5 : 12), y: sharp ? py + 45 : py + 56, width: sharp ? 25 : 24, height: sharp ? 22 : 24, rx: 4,
-        fill: sharp ? '#55585c' : '#fbfaf4',
+        fill: sharp ? '#55585c' : '#ffffff',
         stroke: on ? '#ff9f1c' : (sharp ? '#0b0c0d' : '#8f8a78'), 'stroke-width': on ? 2.4 : 1.6
       }, g);
     }
@@ -11632,7 +11632,7 @@ function doRender() {
     const midi = Object.keys(widx).map(Number).find(m => widx[m] === wi);
     const nt = litMap.get(midi), x = kx0 + i * kw;
     const g = mk('g', { class: 'okey' + (nt ? '' : ' off') + (nt && nt.fill === '#ffe100' ? ' oyel' : '') }, keys);
-    mk('rect', { x: x + 1, y: ky, width: kw - 2, height: kh, rx: 3, fill: nt ? fillFor(nt) : 'url(#orWhite)', stroke: nt ? strokeFor(nt) : '#8b877c', 'stroke-width': nt ? 3 : 1.2 }, g);
+    mk('rect', { x: x + 1, y: ky, width: kw - 2, height: kh, rx: 3, fill: nt ? fillFor(nt) : 'url(#orWhite)', stroke: nt ? strokeFor(nt) : '#8a8a8a', 'stroke-width': nt ? 3 : 1.2 }, g);
     if (nt) {
       ring(g, x + .5, ky, kw - 1, kh, nt);
       addLabel(g, nt, x + kw / 2, ky + kh - 40, kw - 8);
