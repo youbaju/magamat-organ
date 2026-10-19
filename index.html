@@ -2770,6 +2770,7 @@ h1{color:#d6c4a0}
 #shared-oudSvg rect[fill="#a3d0ec"]{fill:#264050}
 #shared-oudSvg rect[fill="#ffffff"][stroke]{fill:#264050}
 #shared-oudSvg polygon[fill="#f3e2c7"]{fill:#3b3226}
+#shared-oudSvg text[stroke="#f3e2c7"]{stroke:#3b3226}
 /* ===== صور الأدلة: ورقة بيضاء مخفّفة السطوع + إطار ===== */
 #maqamGuideImgWrap,#westernGuideImg,#westernGuideChordSvg{filter:brightness(.86);outline:1px solid #6a6a6a;outline-offset:3px;border-radius:8px}
 #maqamGuideImgWrap,#maqamGuideTitleOverlay{color-scheme:light}
@@ -5403,6 +5404,11 @@ function buildOudStatic(){
     points: `${OUD.VISUAL_NUT_X},${neckYTopAtNut} ${NECK_JOINT_END_X},${neckJointTopEndY} ${NECK_JOINT_END_X},${neckJointBottomEndY} ${OUD.VISUAL_NUT_X},${neckYBotAtNut}`,
     fill:'#f3e2c7', stroke:'none'
   }));
+  { // مقصّ برأس الزند (للهالة خلف أسماء الأوتار) بحجم الشكل البيج نفسه داخل الإطار الأسود
+    const cd = el('clipPath', { id: 'nutHeadClip' });
+    cd.appendChild(el('polygon', { points: `${OUD.VISUAL_NUT_X + 3},${neckYTopAtNut + 3} ${NECK_JOINT_END_X - 3},${neckJointTopEndY + 3} ${NECK_JOINT_END_X - 3},${neckJointBottomEndY - 3} ${OUD.VISUAL_NUT_X + 3},${neckYBotAtNut - 3}` }));
+    g2.appendChild(cd);
+  }
   g2.appendChild(el('line', { x1:OUD.VISUAL_NUT_X,y1:neckYTopAtNut,x2:NECK_JOINT_END_X,y2:neckJointTopEndY, stroke:'#111','stroke-width':6,'stroke-linecap':'round' }));
   g2.appendChild(el('line', { x1:OUD.VISUAL_NUT_X,y1:neckYBotAtNut,x2:NECK_JOINT_END_X,y2:neckJointBottomEndY, stroke:'#111','stroke-width':6,'stroke-linecap':'round' }));
   g2.appendChild(el('line', { x1:NECK_JOINT_END_X,y1:neckJointTopEndY,x2:NECK_JOINT_END_X,y2:neckJointBottomEndY, stroke:'#111','stroke-width':6,'stroke-linecap':'round' }));
@@ -5845,6 +5851,14 @@ function buildOudStatic(){
     t.setAttribute('fill', '#000000');
     t.setAttribute('transform', `rotate(${angleDeg2}, ${midX}, ${midY - 8})`);
     t.textContent = stringNames[i];
+    // هالة بلون رأس الزند خلف الحرف: تقطع الوتر حول الحرف فيُقرأ فوق أي وتر (مقصوصة داخل رأس الزند حتى لا تمسح إطاره)
+    const halo = t.cloneNode(true);
+    halo.setAttribute('fill', 'none');
+    halo.setAttribute('stroke', '#f3e2c7');
+    halo.setAttribute('stroke-width', '7');
+    halo.setAttribute('stroke-linejoin', 'round');
+    halo.setAttribute('clip-path', 'url(#nutHeadClip)');
+    g2.appendChild(halo);
     g2.appendChild(t);
   }
 
