@@ -1847,6 +1847,14 @@ flex-shrink: 0;
   font-weight:700;
   color:#fff;
 }
+.about-rights{
+  margin-top:26px;
+  padding-top:16px;
+  border-top:1px solid rgba(138,109,47,.35);
+  font-family:'Cairo',sans-serif;
+  color:#3b3b3b;
+}
+.about-rights p{ margin:4px 0; font-size:.85rem; font-weight:700; line-height:1.7; }
 .social-youtube   { background: #ff0000; }
 .social-tiktok    { background: #000; }
 .social-snap      { background: #FFCA28; }
@@ -2263,7 +2271,7 @@ window.wireCustomSelect = wireCustomSelect;
       const westernBtnsRow = document.getElementById('westernBtnsRow');
       if (westernBtnsRow && window._westernBtnsRowWasVisible && lastPage === 'page-circle') { westernBtnsRow.style.display = ''; }
     ">✕ إغلاق</button>
-    <h2>تواصل معنا</h2>
+    <h2>من نحن</h2>
     <div class="social-grid">
       <a href="https://youtube.com/channel/UCyEYy8M0xEu62M3Z4Jj1qPg?si=NqZ5eaR13vtU3ZD1" target="_blank" class="social-youtube" title="يوتيوب">
         <svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
@@ -2289,6 +2297,12 @@ window.wireCustomSelect = wireCustomSelect;
         <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4zm0 10.9h7c-.5 4.2-3.3 8-7 9.1V12H5V6.3l7-3.1v8.7z"/></svg>
         <span>سياسة الخصوصية</span>
       </a>
+    </div>
+    <div class="about-rights" id="aboutRights">
+      <p id="aboutRights1">جميع الحقوق محفوظة</p>
+      <p id="aboutRights2">الهيئة السعودية للملكية الفكرية</p>
+      <p id="aboutRights3">بإسم: يوسف احمد باجبير</p>
+      <p id="aboutRights4">رقم التسجيل: ‎26-12-90269610</p>
     </div>
   </div>
 </div>
@@ -2704,6 +2718,7 @@ h1{color:#d6c4a0}
 .help-svg-wrap{background:#1a1a1a;border:1px solid #343434}
 #page-social.active{background:#171717}
 .social-page-content h2{color:#d6c4a0}
+.about-rights{color:#e6dccb;border-top-color:#534935}
 .social-snap span{color:#f2f2f2}
 .social-instagram{background:radial-gradient(circle at 30% 107%, #58521b 0%, #58521b 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%)}
 .panel{background:#171717;border:1px solid #4d4d4d}
@@ -5293,7 +5308,7 @@ function buildOudStatic(){
   const shoulderTopEnd = {x: fret7X+SHOULDER_DX, y: topAt7+SHOULDER_DY};
   const shoulderBottomEnd = {x: fret7X+SHOULDER_DX, y: botAt7-SHOULDER_DY};
   g2.appendChild(el('line', { x1:fret7X,y1:topAt7,x2:shoulderTopEnd.x,y2:shoulderTopEnd.y, stroke:'#111','stroke-width':6,'stroke-linecap':'round' }));
-  g2.appendChild(el('line', { x1:fret7X,y1:botAt7,x2:shoulderBottomEnd.x,y2:shoulderBottomEnd.y, stroke:'#111','stroke-width':6,'stroke-linecap':'round' }));
+  g2.appendChild(el('line', { id:'oudShoulderBot', x1:fret7X,y1:botAt7,x2:shoulderBottomEnd.x,y2:shoulderBottomEnd.y, stroke:'#111','stroke-width':6,'stroke-linecap':'round' }));
 
   // 3) خطوط الدساتين + الأرقام
   for(let n=1;n<=13;n++){
@@ -5443,9 +5458,9 @@ function buildOudStatic(){
   const oldHelpBx = (helpXA + helpXB2) / 2; // موقع زر المساعدة القديم (هنا هيصير مكان أزرار اليد الجديد)
   const oldHelpY = OUD.neckBottomY(oldHelpBx) + 60;
   const handScaleForHelp = 1.45, handGapForHelp = 14;
-  const helpBtnW = 88 * handScaleForHelp; // نفس عرض زر "يمين" بالضبط
+  const helpBtnW = 118 * handScaleForHelp; // نفس عرض زر "يمين" بالضبط
   const helpBtnH = 66 * handScaleForHelp; // نفس ارتفاع زر "يمين" بالضبط
-  const helpBx_outer = oldHelpBx - (helpBtnW/2 + handGapForHelp/2) + 20; // زر اللغة يرتبط بهذا الموقع (يضل تحت الزند، ما تغيّر)
+  const helpBx_outer = oldHelpBx - (helpBtnW/2 + handGapForHelp/2) + 20 + 87; // زر اللغة يرتبط بهذا الموقع (يضل تحت الزند، ما تغيّر)
   // موقع زر المساعدة (تحت الزند، مكانه الأصلي) — عنصر SVG جوّا مجموعة g2 اللي تنعكس
   // تلقائياً ككل بوضع اليمين، فنستخدم الإحداثي الطبيعي مباشرة بدون حساب انعكاس يدوي هنا
   const naturalBelowNeckX = helpBx_outer - helpBtnW - handGapForHelp;
@@ -5456,7 +5471,7 @@ function buildOudStatic(){
   // (مو جزء من مجموعة g2 اللي تنعكس تلقائياً)، فنحسب انعكاسه يدوياً بنفس محور انعكاس g2
   const midXForHelpRow = (OUD.NUT_X + OUD.NECK_END_X) / 2;
   const mirrorXForHelpRow = (x) => 2 * midXForHelpRow - x;
-  const naturalAboveNeckX = OUD.VISUAL_NUT_X + 15; // بداية الزند (تأكّد الموضع مع يوسف عبر معاينة فعلية)
+  const naturalAboveNeckX = OUD.VISUAL_NUT_X + 15 - 22; // بداية الزند (تأكّد الموضع مع يوسف عبر معاينة فعلية)
   const micBx = window.isLeftHanded ? naturalAboveNeckX : mirrorXForHelpRow(naturalAboveNeckX);
   const micBy = OUD.neckTopY(naturalAboveNeckX) - 103; // نفس ارتفاع صف زر يمين/يسار وعدد الأوتار (فوق الزند)
   const modeBtnW = 118 * handScaleForHelp; // زر وضع النغمات ("نغمة مستمرة"/"Sustained note") — بعرض كافٍ يسع أطول كلمة إنجليزية ("Sustained") بسطر واحد بدون خروج عن حدود الزر
@@ -5509,9 +5524,9 @@ function buildOudStatic(){
   // ===== أيقونتا اختيار اليد (يمنى/يسرى) - انتقلوا لمكان زر المساعدة سابقاً (صدر العود)، وكبرنا حجمهم =====
   {
     const handScale = 1.45; // تكبير ٤٥٪ عن الحجم الأصلي
-    const handW = 88 * handScale, handH = 66 * handScale, handR = 12 * handScale;
+    const handW = 118 * handScale, handH = 66 * handScale, handR = 12 * handScale;
     const handGap = 14;
-    const groupShift = 20; // إزاحة يمينية بسيطة للمجموعة كاملة، عشان زر عدد الأوتار (الأبعد يساراً) ما ينقص من حافة الرسمة
+    const groupShift = 20 + 87; // إزاحة يمينية بسيطة للمجموعة كاملة، عشان زر عدد الأوتار (الأبعد يساراً) ما ينقص من حافة الرسمة
     const midXForBtns = (OUD.NUT_X + OUD.NECK_END_X) / 2;
     const mirrorXForBtns = (x) => 2 * midXForBtns - x;
     const naturalHand1X = oldHelpBx - (handW/2 + handGap/2) + groupShift;
@@ -6005,7 +6020,7 @@ function buildOudStatic(){
     'font-family':"'Cairo', 'Segoe UI', Tahoma, sans-serif",
     'font-size':'30', 'font-weight':'800', fill:'#0a2f52'
   });
-  btnText.textContent = (window.oudLanguage === 'en') ? 'Contact' : 'تواصل';
+  btnText.textContent = (window.oudLanguage === 'en') ? 'About' : 'من نحن';
   contactG.appendChild(btnRect);
   contactG.appendChild(btnText);
   oudFooterGroup.appendChild(contactG);
@@ -6120,7 +6135,7 @@ function buildOudStatic(){
   cp3.textContent = (window.oudLanguage === 'en') ? 'Registration No: \u200E26-12-90269610' : 'رقم التسجيل: \u200E26-12-90269610';
   copyrightG.appendChild(cp3);
 
-  oudFooterGroup.appendChild(copyrightG);
+  // نص الحقوق انتقل إلى صفحة «من نحن» (لم يعد يُرسم تحت الزند)
   g2.appendChild(oudFooterGroup);
 
   // نقيس عرض النص الفعلي من المتصفح (بعد ما صار جزء من الصفحة الحية) بدل تخمين عرض ثابت — يضمن دقة تامة لأي طول نص بأي لغة
@@ -6166,6 +6181,7 @@ function buildOudStatic(){
 
   // يضمن بقاء نص أزرار التذييل (وأيقونة الشمس/القمر) داخل أزرارها مهما اختلف عرض خط/إيموجي الجهاز (آيباد وغيره)
   window.fitFooterBtnTexts = function(){
+    if (window._bottomRowOn && typeof window.layoutBottomRow === 'function') { window.layoutBottomRow(); return; }
     try {
       [[btnRect, btnText], [ratingRect, ratingText], themeParts ? [themeParts.rect, themeParts.text] : null].forEach(p => {
         if (!p) return;
@@ -7616,7 +7632,9 @@ window.wxResume = wxResume;
         const closeBtnSocial = socialPage.querySelector('.help-close-btn');
         if (closeBtnSocial) closeBtnSocial.textContent = '✕ Close';
         const h2Social = socialPage.querySelector('h2');
-        if (h2Social) h2Social.textContent = 'Contact Us';
+        if (h2Social) h2Social.textContent = 'About';
+        const _ar = { aboutRights1:'All rights reserved', aboutRights2:'Saudi Authority for Intellectual Property', aboutRights3:'By: Yousef Ahmed Bajubair', aboutRights4:'Registration No: \u200E26-12-90269610' };
+        Object.keys(_ar).forEach(k => { const e = document.getElementById(k); if (e) e.textContent = _ar[k]; });
         const socialLabels = { 'يوتيوب':'YouTube', 'تيك توك':'TikTok', 'سناب شات':'Snapchat', 'انستقرام':'Instagram', 'سياسة الخصوصية':'Privacy Policy' };
         socialPage.querySelectorAll('.social-grid a span').forEach(sp => {
           if (socialLabels[sp.textContent.trim()]) sp.textContent = socialLabels[sp.textContent.trim()];
@@ -11087,11 +11105,11 @@ document.getElementById('shared-playBtn').onclick = async function() {
     <div class="help-section" id="help-sec-ar-15">
       <h3>١٥. تقييم التطبيق</h3>
       <p>يمكن لأي زائر أن يقيّم التطبيق بنجوم من ١ إلى ٥، ويرى المعدل العام لكل التقييمات.</p>
-      <p>🔹 <strong>فتح صفحة التقييم:</strong> اضغط زر <strong>"تقييم"</strong> بأسفل الصفحة (بجانب زر "تواصل").</p>
+      <p>🔹 <strong>فتح صفحة التقييم:</strong> اضغط زر <strong>"تقييم"</strong> في صف الأزرار تحت الزند (بجانب زر <strong>"من نحن"</strong>).</p>
       <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_17.jpg" alt="زر تقييم بأسفل الصفحة" style="width:130px;border-radius:6px;display:block;margin:8px auto;"/></div>
       <p>🔹 <strong>إرسال تقييمك:</strong> اضغط على عدد النجوم التي تعبّر عن رأيك (يمكنك تغيير اختيارك قبل التأكيد بالضغط على نجمة ثانية)، ثم اضغط زر <strong>"✓ تأكيد التقييم"</strong> لإرسال تقييمك فعلياً — وبهذه الطريقة لا يُحفظ تقييم بالخطأ في حال الضغط على نجمة خاطئة. بعد التأكيد تظهر رسالة شكر تأكيدية.</p>
       <p>🔹 <strong>تقييم واحد لكل زائر:</strong> بعد إرسال تقييمك، لا يمكنك إرسال تقييم آخر من نفس الجهاز/المتصفح (تصبح النجوم مغلقة)، لكي يبقى المعدل العام دقيقاً ويعكس رأي كل زائر مرة واحدة فقط.</p>
-      <p>🔹 <strong>لديك ملاحظة أو اقتراح؟</strong> يوجد رابط "تواصل معنا" داخل صفحة التقييم يأخذك مباشرة إلى صفحة التواصل بالتطبيق، إذا رغبت في توضيح رأيك بالتفصيل (خصوصاً لو كان تقييمك منخفض ولك سبب معيّن).</p>
+      <p>🔹 <strong>لديك ملاحظة أو اقتراح؟</strong> يوجد رابط "تواصل معنا" داخل صفحة التقييم يأخذك مباشرة إلى صفحة «من نحن» بالتطبيق (وفيها روابط التواصل)، إذا رغبت في توضيح رأيك بالتفصيل (خصوصاً لو كان تقييمك منخفض ولك سبب معيّن).</p>
       <p>🔹 <strong>المعدل العام:</strong> يظهر بأسفل صفحة التقييم للجميع — متوسط كل التقييمات المُرسلة، وعدد الأشخاص الذين قيّموا.</p>
       <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_18.jpg" alt="صفحة تقييم التطبيق كاملة" style="width:60%;border-radius:6px;display:block;margin:8px auto;"/></div>
     </div>
@@ -11164,7 +11182,7 @@ document.getElementById('shared-playBtn').onclick = async function() {
     <div class="help-section" id="help-sec-ar-19">
       <h3>١٩. المفضلة</h3>
       <p>ميزة تتيح لك حفظ أي مقام مع حرفه تستخدمه بشكل متكرر، للرجوع إليه لاحقاً بضغطة واحدة بدل تصفّح القائمة كل مرة.</p>
-      <p>🔹 <strong>موقع الزر:</strong> زر مكتوب عليه "المفضلة" في صف الأزرار أعلى الزند، في أقصى الصف (بجانب زرّي "عدد الأوتار" و"يمين/يسار"). عند التبديل إلى الأورغ يبقى في مكانه نفسه.</p>
+      <p>🔹 <strong>موقع الزر:</strong> زر مكتوب عليه "المفضلة" في صف الأزرار تحت الزند، بين زرّي "عود/أورغ" و"داكن/فاتح". يبقى في مكانه نفسه عند التبديل بين العود والأورغ.</p>
       <div class="help-svg-wrap" style="text-align:center"><span style="display:inline-block;padding:10px 30px;background:#a3d0ec;border:2px solid #3ab4e8;border-radius:14px;color:#0a2f52;font-weight:800;font-family:'Cairo',sans-serif;">المفضلة</span></div>
       <p>🔹 <strong>الإضافة:</strong> بعد اختيار المقام المطلوب على الزند، اضغط زر "المفضلة"، ثم اختر "➕ إضافة الحالي للمفضلة" — يظهر تأكيد فوري بنجاح الإضافة.</p>
       <p>🔹 <strong>الفتح والانتقال:</strong> اضغط زر "المفضلة"، ثم اختر "📂 فتح المفضلة" لعرض قائمة كل المحفوظات (المقام والحرف لكل عنصر). اضغط على أي عنصر للانتقال مباشرة إليه على الزند.</p>
@@ -11178,13 +11196,13 @@ document.getElementById('shared-playBtn').onclick = async function() {
       <h3>٢٠. الوضع الليلي (مظهر التطبيق)</h3>
       <p>يتوفر للتطبيق مظهر داكن مريح للعين في الإضاءة المنخفضة، بجانب المظهر الفاتح.</p>
       <p>🔹 <strong>تلقائياً:</strong> يتبع التطبيق إعداد جهازك — داكن إذا كان جهازك على الوضع الداكن، وفاتح إذا كان على الوضع الفاتح.</p>
-      <p>🔹 <strong>زر المظهر:</strong> بأسفل الزند (بجانب زر "تقييم") ويعرض المظهر الحالي: <strong>"داكن"</strong> أو <strong>"فاتح"</strong>. اضغطه للتبديل بينهما في أي وقت، ويُحفظ اختيارك على جهازك.</p>
+      <p>🔹 <strong>زر المظهر:</strong> في صف الأزرار تحت الزند، على الطرف الذي فيه زر الميكروفون (بجانب زر "المفضلة") ويعرض المظهر الحالي: <strong>"داكن"</strong> أو <strong>"فاتح"</strong>. اضغطه للتبديل بينهما في أي وقت، ويُحفظ اختيارك على جهازك.</p>
     </div>
 
     <div class="help-section" id="help-sec-ar-21">
       <h3>٢١. الأورغ (بديل عن زند العود)</h3>
       <p>يمكنك عرض المقامات والسلالم والكوردات على مفاتيح أورغ بدلاً من زند العود — مفيد لمن يعزف على أورغ يدعم الربع تون.</p>
-      <p>🔹 <strong>زر التبديل:</strong> في العمود الأيمن تحت زرّي اللغة والمساعدة (؟)؛ يعرض الآلة الظاهرة حالياً: «عود» عندما يكون العود ظاهراً، و«أورغ» عندما يكون الأورغ ظاهراً؛ اضغطه لتبديل الآلة. اختيارك يُحفظ ويبقى لحين تغييره.</p>
+      <p>🔹 <strong>زر التبديل:</strong> في صف الأزرار تحت الزند (بين زرّي "المفضلة" و"تقييم")؛ يعرض الآلة الظاهرة حالياً: «عود» عندما يكون العود ظاهراً، و«أورغ» عندما يكون الأورغ ظاهراً؛ اضغطه لتبديل الآلة. اختيارك يُحفظ ويبقى لحين تغييره.</p>
       <p>🔹 <strong>المفاتيح:</strong> ٢٢ مفتاحاً أبيض من الفا إلى الفا بالإضافة إلى المفاتيح السوداء. المفاتيح الزرقاء هي نغمات المقام أو السلم أو الكورد المعروض، والأحمر هو النغمة الحالية أثناء التشغيل. اضغط أي مفتاح مضاء لتسمع نغمته.</p>
       <p>🔹 <strong>علامة نصف البيمول على المفتاح:</strong> تعني أن النغمة أخفض بربع تون عن المفتاح نفسه.</p>
       <p>🔹 <strong>لوحة SCALE SETTING (في المقامات العربية فقط):</strong> اثنا عشر زراً تقابل النغمات من دو إلى سي. الزر المضاء (لمبته حمراء) يعني أن عليك خفض هذه النغمة ربع تون في أورغك قبل أن تعزف المقام. اللوحة للعرض فقط ولا تُضغط. في مقام الراست عند النزول تنخفض الدرجة السابعة ربع تون فتتغير إضاءة اللوحة تبعاً لذلك.</p>
@@ -11364,11 +11382,11 @@ document.getElementById('shared-playBtn').onclick = async function() {
     <div class="help-section" id="help-sec-en-15">
       <h3>15. Rating the App</h3>
       <p>Any visitor can rate the app from 1 to 5 stars, and see the overall average of all ratings.</p>
-      <p>🔹 <strong>Opening the rating page:</strong> Press the <strong>"Rate"</strong> button at the bottom of the page (beside the "Contact" button).</p>
+      <p>🔹 <strong>Opening the rating page:</strong> Press the <strong>"Rate"</strong> button in the button row below the fretboard (beside the <strong>"About"</strong> button).</p>
       <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_36.jpg" alt="Rate button at the bottom of the page" style="width:130px;border-radius:6px;display:block;margin:8px auto;"/></div>
       <p>🔹 <strong>Submitting your rating:</strong> Tap the number of stars that reflects your opinion (you can change your choice before confirming by tapping a different star), then press the <strong>"✓ Confirm Rating"</strong> button to actually submit it — this way a rating never gets saved by mistake if you tap the wrong star. A thank-you message appears after confirming.</p>
       <p>🔹 <strong>One rating per visitor:</strong> After submitting your rating, you can't submit another one from the same device/browser (the stars become locked), so the overall average stays accurate and reflects each visitor's opinion just once.</p>
-      <p>🔹 <strong>Have feedback or a suggestion?</strong> There's a "Contact Us" link inside the rating page that takes you directly to the app's contact page, if you'd like to explain your opinion in more detail (especially if your rating was low and you have a specific reason).</p>
+      <p>🔹 <strong>Have feedback or a suggestion?</strong> There's a "Contact Us" link inside the rating page that takes you directly to the app's "About" page (which has the contact links), if you'd like to explain your opinion in more detail (especially if your rating was low and you have a specific reason).</p>
       <p>🔹 <strong>Overall average:</strong> Shown at the bottom of the rating page for everyone — the average of all submitted ratings, and the number of people who rated.</p>
       <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_37.jpg" alt="The full app rating page" style="width:60%;border-radius:6px;display:block;margin:8px auto;"/></div>
     </div>
@@ -11441,7 +11459,7 @@ document.getElementById('shared-playBtn').onclick = async function() {
     <div class="help-section" id="help-sec-en-19">
       <h3>19. Favorites</h3>
       <p>A feature that lets you save any maqam together with its letter that you use often, so you can jump back to it later with one tap instead of browsing the list every time.</p>
-      <p>🔹 <strong>Where to find it:</strong> a button labelled "Favorites" in the button row above the fretboard, at the far end of the row (next to the string-count and right/left-hand buttons). When you switch to the organ it stays in exactly the same place.</p>
+      <p>🔹 <strong>Where to find it:</strong> a button labelled "Favorites" in the button row below the fretboard, between the "Oud/Organ" and "Dark/Light" buttons. It stays in exactly the same place when you switch between the oud and the organ.</p>
       <div class="help-svg-wrap" style="text-align:center"><span style="display:inline-block;padding:10px 30px;background:#a3d0ec;border:2px solid #3ab4e8;border-radius:14px;color:#0a2f52;font-weight:800;font-family:'Cairo',sans-serif;">Favorites</span></div>
       <p>🔹 <strong>Adding:</strong> after choosing the maqam you want on the fretboard, tap the "Favorites" button, then choose "➕ Add current to favorites" — a quick confirmation appears once it's saved.</p>
       <p>🔹 <strong>Opening and jumping to one:</strong> tap the "Favorites" button, then choose "📂 Open favorites" to see a list of everything saved (maqam and letter for each item). Tap any item to jump straight to it on the fretboard.</p>
@@ -11455,13 +11473,13 @@ document.getElementById('shared-playBtn').onclick = async function() {
       <h3>20. Dark mode (app appearance)</h3>
       <p>The app has a dark appearance that is easier on the eyes in low light, alongside the light appearance.</p>
       <p>🔹 <strong>Automatic:</strong> the app follows your device setting — dark if your device is in dark mode, light if it is in light mode.</p>
-      <p>🔹 <strong>Appearance button:</strong> below the fretboard (beside the "Rate" button) it shows the current appearance: <strong>"Dark"</strong> or <strong>"Light"</strong>. Tap it to switch between them at any time; your choice is saved on your device.</p>
+      <p>🔹 <strong>Appearance button:</strong> in the button row below the fretboard, on the same side as the microphone button (beside the "Favorites" button) it shows the current appearance: <strong>"Dark"</strong> or <strong>"Light"</strong>. Tap it to switch between them at any time; your choice is saved on your device.</p>
     </div>
 
     <div class="help-section" id="help-sec-en-21">
       <h3>21. Organ (alternative to the oud fretboard)</h3>
       <p>You can show maqamat, scales and chords on organ keys instead of the oud fretboard — useful if you play an organ that supports quarter tones.</p>
-      <p>🔹 <strong>Switch button:</strong> in the right-hand column under the language and help (?) buttons; it shows the instrument currently displayed: "Oud" while the oud is shown and "Organ" while the organ is shown; press it to switch. Your choice is remembered.</p>
+      <p>🔹 <strong>Switch button:</strong> in the button row below the fretboard (between the "Favorites" and "Rate" buttons); it shows the instrument currently displayed: "Oud" while the oud is shown and "Organ" while the organ is shown; press it to switch. Your choice is remembered.</p>
       <p>🔹 <strong>Keys:</strong> 22 white keys from F to F plus the black keys. Blue keys are the notes of the displayed maqam, scale or chord; red is the current note during playback. Press any lit key to hear its note.</p>
       <p>🔹 <strong>Half-flat sign on a key:</strong> the note is a quarter tone lower than the key itself.</p>
       <p>🔹 <strong>SCALE SETTING panel (Arabic maqamat only):</strong> twelve buttons for the notes C to B. A lit button (red LED) means you should lower that note by a quarter tone on your keyboard before playing the maqam. The panel is display-only and cannot be pressed. In Rast, the 7th degree drops a quarter tone on the way down, so the panel lights change accordingly.</p>
@@ -11600,7 +11618,6 @@ svg#shared-oudSvg #organLayer .okey.blk.off rect{pointer-events:auto}
 #organLayer .pbtn{pointer-events:none}
 svg#shared-oudSvg #organLayer .okey rect,svg#shared-oudSvg #instrumentToggleBtn rect{pointer-events:auto}
 svg#shared-oudSvg #organLayer .okey .obase,svg#shared-oudSvg #organLayer .olabel *{pointer-events:none}
-#shared-oudSvg.organ-mode #langToggleBtn,#shared-oudSvg.organ-mode #helpBtn,#shared-oudSvg.organ-mode #noteSystemToggleBtn{transform:translateY(50px)}
 html,body{overscroll-behavior-y:none}
 #instrumentToggleBtn{cursor:pointer}
 #instrumentToggleBtn:active{transform:translateY(3px)}
@@ -11650,7 +11667,7 @@ function collect(src) {
 }
 
 // ===== الرسم =====
-let X0 = -470, CW = 1780; const CH = 345, Y0 = 161;
+let X0 = -470, CW = 1780; const CH = 315, Y0 = 141;
 let busy = false;
 function render() {
   if (busy) return; busy = true;
@@ -11818,18 +11835,10 @@ function svgBox(el) {
 function svgShown() { const r = svg.getBoundingClientRect(); return r.width > 0 && r.height > 0 && !!svg.getScreenCTM(); }
 function placeToggle() {
   if (!svgShown()) return;   // الرسمة مخفية (مثلاً صفحة تواصل مفتوحة): القياسات صفرية فلا نعيد الترتيب
-  const lr = document.querySelector('#langToggleBtn rect'), hr = document.querySelector('#helpBtn rect');
-  if (!lr) return;
-  const L = svgBox(lr), H = hr ? svgBox(hr) : L;
-  let x1 = Math.min(L.x1, H.x1), x2 = Math.max(L.x2, H.x2);
-  // بالإنجليزية يظهر زر Do/C كزر ثالث فوق: نمدّ الزر ليغطي الثلاثة
-  const nr = document.querySelector('#noteSystemToggleBtn rect');
-  if (nr && nr.getBoundingClientRect().width > 0) { const N = svgBox(nr); x1 = Math.min(x1, N.x1); x2 = Math.max(x2, N.x2); }
-  const h = Math.round(L.y2 - L.y1) || 70, y = Math.max(L.y2, H.y2) + 10;
-  tgRect.setAttribute('x', x1); tgRect.setAttribute('y', y); tgRect.setAttribute('width', x2 - x1); tgRect.setAttribute('height', h);
-  tgText.setAttribute('x', (x1 + x2) / 2); tgText.setAttribute('y', y + h * 0.66);
   const en = window.oudLanguage === 'en';
   tgText.textContent = organMode ? (en ? 'Organ' : 'أورغ') : (en ? 'Oud' : 'عود');
+  tgRect.setAttribute('rx', 16);
+  layoutBottomRow();
 }
 tg.addEventListener('click', () => {
   organMode = !organMode;
@@ -11845,35 +11854,97 @@ tg.addEventListener('click', () => {
   window.location.reload();
 });
 
-// ===== توزيع أزرار التذييل تحت الأورغ =====
-function layoutFooter() {
-  if (!svgShown()) return;
-  const f = document.getElementById('oudFooterGroup'); if (!f) return;
-  const items = Array.from(f.children).filter(c => c.tagName === 'g');
-  items.forEach(c => {
-    if (c.dataset.oT === undefined) c.dataset.oT = c.getAttribute('transform') || '';
-    if (c.dataset.oT) c.setAttribute('transform', c.dataset.oT); else c.removeAttribute('transform');
-  });
-  if (!organMode || !items.length) return;
-  const colEls = ['#langToggleBtn rect', '#helpBtn rect', '#noteSystemToggleBtn rect', '#instrumentToggleBtn rect']
-    .map(q => document.querySelector(q)).filter(Boolean).map(svgBox);
-  if (!colEls.length) return;
-  const col = { x1: Math.min.apply(null, colEls.map(b => b.x1)), x2: Math.max.apply(null, colEls.map(b => b.x2)) };
-  const boxes = items.map(c => ({ c, b: svgBox(c) }));
-  const sumW = boxes.reduce((s, o) => s + (o.b.x2 - o.b.x1), 0);
-  const colOnRight = (col.x1 + col.x2) / 2 > X0 + CW / 2;
-  const sg = (f.getScreenCTM().a * svg.getScreenCTM().a) >= 0 ? 1 : -1;
-  const put = (o, dx) => { dx *= sg; const t = o.c.dataset.oT; o.c.setAttribute('transform', `translate(${dx},0)` + (t ? ' ' + t : '')); };
-  if (colOnRight) {
-    boxes.sort((a, b) => a.b.x1 - b.b.x1);
-    const gap = (col.x1 - X0 - sumW) / boxes.length; let x = X0;
-    boxes.forEach(o => { put(o, x - o.b.x1); x += (o.b.x2 - o.b.x1) + gap; });
-  } else {
-    boxes.sort((a, b) => b.b.x2 - a.b.x2);
-    const R = X0 + CW, gap = (R - col.x2 - sumW) / boxes.length; let x = R;
-    boxes.forEach(o => { put(o, x - o.b.x2); x -= (o.b.x2 - o.b.x1) + gap; });
-  }
+// ===== توزيع أزرار التذييل: استُبدل بـ layoutBottomRow (صف واحد بجانب زر اللغة) =====
+function layoutFooter() { layoutBottomRow(); }
+
+// ===== صف الأزرار السفلي: من نحن، تقييم، عود/أورغ، المفضلة، داكن =====
+// بحجم زر «النغمة المستمرة»، على صف زر اللغة نفسه، موزعة بمسافات متساوية، وزر المظهر محاذٍ لحافة الميكروفون الخارجية
+let _brCv = null;
+function brLayer() {
+  let L = document.getElementById('bottomRowLayer');
+  if (!L) L = mk('g', { id: 'bottomRowLayer' }, svg);
+  return L;
 }
+function brAdopt(id, L) {
+  const cands = Array.from(svg.querySelectorAll('[id="' + id + '"]'));
+  const fresh = cands.find(e => e.parentNode !== L);
+  if (fresh) { cands.forEach(e => { if (e !== fresh && e.parentNode === L) e.remove(); }); L.appendChild(fresh); return fresh; }
+  return cands[0] || null;
+}
+function layoutBottomRow() {
+  if (!svgShown()) return;
+  const lr = document.querySelector('#langToggleBtn rect');
+  const nb = document.getElementById('noteModeToggleBtn'), mb = document.getElementById('micVerifyHtmlBtn');
+  if (!lr || !nb || !mb) return;
+  const LR = lr.getBoundingClientRect(), NB = nb.getBoundingClientRect(), MB = mb.getBoundingClientRect();
+  if (!LR.width || !NB.width || !MB.width) return;
+  const ctm = svg.getScreenCTM(); if (!ctm || !ctm.a) return;
+  const L = brLayer();
+  const about = brAdopt('svgContactBtn', L), rate = brAdopt('svgRatingBtn', L), theme = brAdopt('svgThemeBtn', L);
+  const fb = document.getElementById('favBtn');
+  const slots = [theme, fb, tg, rate, about];                 // من الحافة الخارجية (جهة الميكروفون) إلى الداخل (جهة زر اللغة)
+  if (slots.some(s => !s)) return;
+  window._bottomRowOn = true;
+  // عنقود زر اللغة/المساعدة/نظام التسمية (بدون زر العود/الأورغ: انتقل للصف)
+  let cl = { left: LR.left, right: LR.right };
+  ['#helpBtn rect', '#noteSystemToggleBtn rect'].forEach(q => { const e = document.querySelector(q); if (!e) return; const r = e.getBoundingClientRect(); if (r.width > 0) { cl.left = Math.min(cl.left, r.left); cl.right = Math.max(cl.right, r.right); } });
+  const onRight = (cl.left + cl.right) / 2 > (MB.left + MB.right) / 2;
+  const sgn = onRight ? 1 : -1;
+  const Hs = NB.height, Ws0 = NB.width, yC = LR.top + LR.height / 2;
+  const outer = organMode ? (onRight ? MB.left : MB.right)           // الأورغ: زر النغمة انتقل للطرف المقابل، فالمرجع الميكروفون وحده
+                          : (onRight ? Math.min(MB.left, NB.left) : Math.max(MB.right, NB.right));
+  let limit = onRight ? cl.left : cl.right;                  // حدّ الصف الداخلي: حافة العنقود (أو خط الكتف في العود)
+  {                                                           // خط كتف العود المائل (موجود ومخفي بالأورغ: نستعمله ليتطابق الصف مع العود): لا تتقاطع الأزرار معه
+    const ln = document.getElementById('oudShoulderBot');
+    if (ln && ln.getBoundingClientRect().width > 0) {
+      const lm = ln.getScreenCTM();
+      const p0 = new DOMPoint(ln.x1.baseVal.value, ln.y1.baseVal.value).matrixTransform(lm), p1 = new DOMPoint(ln.x2.baseVal.value, ln.y2.baseVal.value).matrixTransform(lm);
+      const ya = Math.min(p0.y, p1.y), yb = Math.max(p0.y, p1.y), top = yC - Hs / 2, bot = yC + Hs / 2;
+      if (!(yb < top || ya > bot) && Math.abs(p1.y - p0.y) > 0.5) {
+        const xAt = y => p0.x + (Math.min(Math.max(y, ya), yb) - p0.y) * (p1.x - p0.x) / (p1.y - p0.y);
+        const xs = [xAt(top), xAt(bot)], half = 3 * ctm.a;
+        limit = onRight ? Math.min(limit, Math.min.apply(null, xs) - half) : Math.max(limit, Math.max.apply(null, xs) + half);
+      }
+    }
+  }
+  const span = (limit - outer) * sgn;
+  if (!(span > 40)) return;
+  // خمسة أزرار + فراغ بعد آخرها قبل الحدّ الداخلي: كل الفراغات متساوية (تعامل العنقود/الخط كعنصر سادس)
+  const n = 5, gMin = 6;
+  let Wb = Ws0; if ((span - n * Wb) / n < gMin) Wb = (span - n * gMin) / n;
+  const gap = (span - n * Wb) / n;
+  // خط موحّد: الأكبر الذي تتسع به أطول كلمة بين الأزرار الخمسة
+  const cv = _brCv || (_brCv = document.createElement('canvas').getContext('2d'));
+  cv.font = '800 100px Cairo, Arial, sans-serif';
+  const labelOf = s => (s === fb ? fb.textContent : (s.querySelector('text') ? s.querySelector('text').textContent : '')) || '';
+  const pad = Math.max(4, Wb * 0.07);
+  let px = Hs * 0.42;
+  slots.forEach(s => { const w = cv.measureText(labelOf(s)).width / 100; if (w > 0) px = Math.min(px, (Wb - 2 * pad) / (w * 1.04)); });
+  const inv = ctm.inverse(), U = v => v / ctm.a;
+  const stroke = lr.getAttribute('stroke-width') || '2', rx = parseFloat(lr.getAttribute('rx')) || 16;
+  const wrap = document.querySelector('.shared-oud-wrapper'), wr = wrap ? wrap.getBoundingClientRect() : { left: 0, top: 0 };
+  slots.forEach((s, i) => {
+    const start = outer + sgn * i * (Wb + gap), left = onRight ? start : start - Wb, top = yC - Hs / 2;
+    if (s === fb) {
+      if (wrap && fb.parentNode !== wrap) wrap.appendChild(fb);
+      const st = (k, v) => fb.style.setProperty(k, v, 'important');
+      st('position', 'absolute'); st('right', 'auto'); st('left', (left - wr.left) + 'px'); st('top', (top - wr.top) + 'px');
+      st('width', Wb + 'px'); st('height', Hs + 'px'); st('font-size', px + 'px');
+      return;
+    }
+    const rect = s.querySelector('rect'), text = s.querySelector('text'); if (!rect || !text) return;
+    const p = new DOMPoint(left, top).matrixTransform(inv);
+    rect.setAttribute('x', p.x); rect.setAttribute('y', p.y); rect.setAttribute('width', U(Wb)); rect.setAttribute('height', U(Hs));
+    rect.setAttribute('rx', rx); rect.setAttribute('stroke-width', stroke);
+    rect.setAttribute('fill', lr.getAttribute('fill') || '#a3d0ec'); rect.setAttribute('stroke', lr.getAttribute('stroke') || '#3ab4e8');
+    text.removeAttribute('transform');
+    text.setAttribute('text-anchor', 'middle'); text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('x', p.x + U(Wb) / 2); text.setAttribute('y', p.y + U(Hs) / 2 + U(px) * 0.06);
+    text.setAttribute('font-size', U(px));
+    text.dataset.fs0 = String(U(px));
+  });
+}
+window.layoutBottomRow = layoutBottomRow;
 
 // ===== المراقبة =====
 let raf = 0;
@@ -11995,7 +12066,13 @@ function filterRoots() {
     imp('background', cs.fill); imp('border-color', cs.stroke); imp('color', ts.fill);
     // الميكروفون والنغمة المستمرة/القصيرة: نفس الحجم والخط ومحاذاة الصف
     // الميكروفون والنغمة: حجمهما أصلي؛ نرفعهما رأسياً فقط لمحاذاة صف يمين/المفضلة
-    [nb, mb].forEach(e => { if (!e) return; const r = e.getBoundingClientRect(); if (r.width > 0) e.style.translate = '0 ' + (yC - (r.top + r.height / 2)) + 'px'; });
+    // الأورغ: زر النغمة المستمرة/القصيرة ينتقل للطرف المقابل للميكروفون (حافته الخارجية على حافة الأورغ) لتناسق الصف
+    const og = organMode ? document.getElementById('organLayer') : null, ob = og ? og.getBoundingClientRect() : null;
+    [nb, mb].forEach(e => {
+      if (!e) return; const r = e.getBoundingClientRect(); if (!(r.width > 0)) return;
+      let dx = 0; if (e === nb && ob && ob.width > 0) dx = onRight ? (ob.right - r.right) : (ob.left - r.left);
+      e.style.translate = dx + 'px ' + (yC - (r.top + r.height / 2)) + 'px';
+    });
     if (!organMode) {
       // أزرار العود: تكبير مستطيلاتها ونصوصها حول مراكزها، ثم تتابعها للداخل بعد المفضلة بنفس الفراغ
       const grow = (g, box) => {
@@ -12013,7 +12090,7 @@ function filterRoots() {
         });
       };
       if (phone) { grow(hg, b); if (sg && sb) grow(sg, sb); }
-      let edge = onRight ? outer - Wf : outer + Wf;
+      let edge = outer;   // المفضلة انتقلت لصف الأزرار السفلي: زرّا الأوتار واليد يأخذان أقصى الصف
       [sb && sg ? { g: sg, box: sb } : null, { g: hg, box: b }].forEach(o => {
         if (!o) return;
         const ws = o.box.width * sw;
@@ -12022,6 +12099,7 @@ function filterRoots() {
         o.g.style.transform = 'translate(' + dxU + 'px,' + dyU + 'px)';
       });
     }
+    if (typeof window.layoutBottomRow === 'function') window.layoutBottomRow();
   }
   let _pq = 0;
   new MutationObserver(() => { if (_pq) return; _pq = requestAnimationFrame(() => { _pq = 0; place(); }); }).observe(svg, { childList: true, subtree: true });
@@ -12035,7 +12113,7 @@ function filterRoots() {
   const label = document.getElementById('arHarfLabel'); if (!label) return;
   function pos() {
     if (label.style.display === 'none' || !window.isArabicMode) return;
-    const fb = document.getElementById('favBtn'), wrapper = document.querySelector('.shared-oud-wrapper');
+    const fb = document.getElementById('micVerifyHtmlBtn'), wrapper = document.querySelector('.shared-oud-wrapper');   // مرجع الصف العلوي: الميكروفون (المفضلة انتقلت للصف السفلي)
     if (!fb || !wrapper) return;
     const fr = fb.getBoundingClientRect(); if (!fr.width) return;
     const wr = wrapper.getBoundingClientRect(), cx = innerWidth / 2;
@@ -12046,7 +12124,7 @@ function filterRoots() {
     imp('border', '1.5px solid ' + (rcs && rcs.borderTopColor ? rcs.borderTopColor : '#3ab4e8'));
     imp('border-radius', '999px'); imp('padding', '5px 16px'); imp('box-sizing', 'border-box'); imp('text-align', 'center');
     // أقرب عائق يمين/يسار المنتصف على الصف نفسه
-    const ids = ['micVerifyHtmlBtn', 'noteModeToggleBtn', 'favBtn'];
+    const ids = ['micVerifyHtmlBtn', 'noteModeToggleBtn'];
     const rects = ids.map(i => document.getElementById(i)).filter(Boolean).map(e => e.getBoundingClientRect());
     if (!organMode) ['#handToggleBtn rect', '#stringCountBtn rect'].forEach(q => { const e = document.querySelector(q); if (e) rects.push(e.getBoundingClientRect()); });
     let lim = Infinity;
