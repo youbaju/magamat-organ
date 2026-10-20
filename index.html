@@ -3788,11 +3788,11 @@ window.isArabicMode = false;
     // نقسّم النص لسطرين (عبر <br>) بدل الاعتماد على التفاف تلقائي حسب عرض الزر — يضمن دايماً
     // شكل ثابت "كلمة فوق كلمة" بغض النظر عن عرض الزر الفعلي
     if (window.oudLanguage === 'en') {
-      btn.innerHTML = isShort ? 'Short<br>note' : 'Sustained<br>note';
-      btn.title = 'Note tap mode';
+      btn.innerHTML = isShort ? 'Sustained<br>note' : 'Short<br>note'; // الزر يعرض الوضع الذي سينتقل إليه بعد الضغط
+      btn.title = 'Switch note tap mode';
     } else {
-      btn.innerHTML = isShort ? 'نغمة<br>قصيرة' : 'نغمة<br>مستمرة';
-      btn.title = 'وضع الضغط على نغمات الزند';
+      btn.innerHTML = isShort ? 'نغمة<br>مستمرة' : 'نغمة<br>قصيرة'; // الزر يعرض الوضع الذي سينتقل إليه بعد الضغط
+      btn.title = 'تبديل وضع الضغط على نغمات الزند';
     }
   };
   window.positionNoteModeToggleBtn = function(){
@@ -10970,7 +10970,7 @@ document.getElementById('shared-playBtn').onclick = async function() {
 
     <div class="help-section" id="help-sec-ar-1">
       <h3>١. زر تبديل اللغة</h3>
-      <p>يوجد زر بجانب زر المساعدة تحت زند العود يبدّل لغة التطبيق بالكامل بين <strong>العربية</strong> و<strong>الإنجليزية</strong> — يتبادل نص الزر تلقائياً بين اسم اللغة الحالية بالعربي والإنجليزي (مثلاً "عربي" ↔ "Arabic")، لكي يكون واضحاً لأي زائر مهما كانت اللغة التي يقرأها.</p>
+      <p>يوجد زر بجانب زر المساعدة تحت زند العود يبدّل لغة التطبيق بالكامل بين <strong>العربية</strong> و<strong>الإنجليزية</strong> — عليه أيقونة <strong>كرة أرضية 🌐</strong> معروفة عالمياً، فيفهمها أي زائر مهما كانت اللغة التي يقرأها.</p>
       <p>🔹 اضغط الزر لتبديل اللغة فوراً (تُعاد الصفحة تلقائياً لتطبيق اللغة الجديدة على كل عناصر التطبيق).</p>
       <p>🔹 اختيارك يُحفظ ويبقى مفعّلاً حتى لو أغلقت المتصفح ورجعت إلى التطبيق لاحقاً.</p>
       <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_01.jpg" alt="زر تبديل اللغة كما يظهر بالوضع العربي" style="width:120px;border-radius:6px;display:block;margin:8px auto;"/></div>
@@ -11076,7 +11076,7 @@ document.getElementById('shared-playBtn').onclick = async function() {
 
     <div class="help-section" id="help-sec-ar-13">
       <h3>١٣. سماع نغمة فردية بالضغط عليها</h3>
-      <p>بالإضافة لتشغيل السلم أو المقام كاملاً بأزرار المشغل، يمكنك سماع أي نغمة منفردة مباشرة من على الزند بالضغط عليها. زر صغير بجانب زر المايكروفون (فوق بداية الزند) يحدد السلوك الذي يحدث عند الضغط — اضغط عليه لتبديل الوضع بين:</p>
+      <p>بالإضافة لتشغيل السلم أو المقام كاملاً بأزرار المشغل، يمكنك سماع أي نغمة منفردة مباشرة من على الزند بالضغط عليها. زر صغير بجانب زر المايكروفون (فوق بداية الزند) يحدد السلوك الذي يحدث عند الضغط — اضغط عليه لتبديل الوضع بين الوضعين التاليين. <strong>الزر يعرض الوضع الذي ستنتقل إليه عند الضغط عليه</strong> وليس الوضع الحالي (فإذا كان مكتوباً عليه «نغمة قصيرة» فالوضع الحالي هو المستمرة، وبالضغط ينتقل إلى القصيرة):</p>
       <div style="display:flex; gap:14px; align-items:center; justify-content:center; margin:14px 0; flex-wrap:wrap;">
         <img loading="lazy" decoding="async" src="images/help/help_13.jpg" alt="زر نغمة مستمرة" style="max-width:180px; border-radius:8px;"/>
         <img loading="lazy" decoding="async" src="images/help/help_14.jpg" alt="زر نغمة قصيرة" style="max-width:180px; border-radius:8px;"/>
@@ -11184,10 +11184,10 @@ document.getElementById('shared-playBtn').onclick = async function() {
     <div class="help-section" id="help-sec-ar-19">
       <h3>١٩. المفضلة</h3>
       <p>ميزة تتيح لك حفظ أي مقام مع حرفه تستخدمه بشكل متكرر، للرجوع إليه لاحقاً بضغطة واحدة بدل تصفّح القائمة كل مرة.</p>
-      <p>🔹 <strong>موقع الزر:</strong> زر مكتوب عليه "المفضلة" في صف الأزرار تحت الزند، بين زرّي "عود/أورغ" و"داكن/فاتح". يبقى في مكانه نفسه عند التبديل بين العود والأورغ.</p>
-      <div class="help-svg-wrap" style="text-align:center"><span style="display:inline-block;padding:10px 30px;background:#a3d0ec;border:2px solid #3ab4e8;border-radius:14px;color:#0a2f52;font-weight:800;font-family:'Cairo',sans-serif;">المفضلة</span></div>
-      <p>🔹 <strong>الإضافة:</strong> بعد اختيار المقام المطلوب على الزند، اضغط زر "المفضلة"، ثم اختر "➕ إضافة الحالي للمفضلة" — يظهر تأكيد فوري بنجاح الإضافة.</p>
-      <p>🔹 <strong>الفتح والانتقال:</strong> اضغط زر "المفضلة"، ثم اختر "📂 فتح المفضلة" لعرض قائمة كل المحفوظات (المقام والحرف لكل عنصر). اضغط على أي عنصر للانتقال مباشرة إليه على الزند.</p>
+      <p>🔹 <strong>موقع الزر:</strong> زر عليه أيقونة <strong>نجمة ⭐</strong> في صف الأزرار تحت الزند، بجانب زر المظهر (قمر/شمس) وزر التبديل بين العود والأورغ. يبقى في مكانه نفسه عند التبديل بين العود والأورغ.</p>
+      <div class="help-svg-wrap" style="text-align:center"><span style="display:inline-block;padding:10px 30px;background:#a3d0ec;border:2px solid #3ab4e8;border-radius:14px;color:#0a2f52;font-weight:800;font-family:'Cairo',sans-serif;">⭐</span></div>
+      <p>🔹 <strong>الإضافة:</strong> بعد اختيار المقام المطلوب على الزند، اضغط زر النجمة ⭐، ثم اختر "➕ إضافة الحالي للمفضلة" — يظهر تأكيد فوري بنجاح الإضافة.</p>
+      <p>🔹 <strong>الفتح والانتقال:</strong> اضغط زر النجمة ⭐، ثم اختر "📂 فتح المفضلة" لعرض قائمة كل المحفوظات (المقام والحرف لكل عنصر). اضغط على أي عنصر للانتقال مباشرة إليه على الزند.</p>
       <p>🔹 <strong>الحذف:</strong> اضغط ✕ بجانب أي عنصر داخل قائمة المفضلة لحذفه.</p>
       <p>🔹 <strong>في المقامات الغربية:</strong> للزر قائمتان منفصلتان عن العربي: قائمة <strong>السلالم</strong> (النغمة ونوع السلم)، وقائمة <strong>الكوردات</strong> (الكورد ودرجته وسلمه). يحفظ الزر تلقائياً القائمة المناسبة لما تعرضه الآن: سلم عادي أو كورد. ومن نافذة القائمة تبدّل بين «السلالم» و«الكوردات» من الأزرار أعلاها.</p>
       <p>🔹 <strong>وضع التمرين:</strong> في المقامات العربية والغربية يبقى زر المفضلة ظاهراً لكنه معطّل (باهت) طوال تفعيل وضع التمرين، ويعود للعمل عند إلغائه.</p>
@@ -11198,17 +11198,18 @@ document.getElementById('shared-playBtn').onclick = async function() {
       <h3>٢٠. الوضع الليلي (مظهر التطبيق)</h3>
       <p>يتوفر للتطبيق مظهر داكن مريح للعين في الإضاءة المنخفضة، بجانب المظهر الفاتح.</p>
       <p>🔹 <strong>تلقائياً:</strong> يتبع التطبيق إعداد جهازك — داكن إذا كان جهازك على الوضع الداكن، وفاتح إذا كان على الوضع الفاتح.</p>
-      <p>🔹 <strong>زر المظهر:</strong> في صف الأزرار تحت الزند، على الطرف الذي فيه زر الميكروفون (بجانب زر "المفضلة") ويعرض المظهر الحالي: <strong>"داكن"</strong> أو <strong>"فاتح"</strong>. اضغطه للتبديل بينهما في أي وقت، ويُحفظ اختيارك على جهازك.</p>
+      <p>🔹 <strong>زر المظهر:</strong> في صف الأزرار تحت الزند، على الطرف الذي فيه زر الميكروفون (بجانب زر "المفضلة") وعليه أيقونة المظهر الذي ستنتقل إليه: <strong>قمر 🌙</strong> (فالمظهر الحالي فاتح وبالضغط يصبح داكناً)، أو <strong>شمس ☀️</strong> (فالمظهر الحالي داكن وبالضغط يصبح فاتحاً). اضغطه للتبديل بينهما في أي وقت، ويُحفظ اختيارك على جهازك.</p>
     </div>
 
     <div class="help-section" id="help-sec-ar-21">
       <h3>٢١. الأورغ (بديل عن زند العود)</h3>
       <p>يمكنك عرض المقامات والسلالم والكوردات على مفاتيح أورغ بدلاً من زند العود — مفيد لمن يعزف على أورغ يدعم الربع تون.</p>
-      <p>🔹 <strong>زر التبديل:</strong> في صف الأزرار تحت الزند (بين زرّي "المفضلة" و"تقييم")؛ يعرض الآلة الظاهرة حالياً: «عود» عندما يكون العود ظاهراً، و«أورغ» عندما يكون الأورغ ظاهراً؛ اضغطه لتبديل الآلة. اختيارك يُحفظ ويبقى لحين تغييره.</p>
+      <p>🔹 <strong>زر التبديل:</strong> في صف الأزرار تحت الزند (بين زرّي "المفضلة" و"تقييم")؛ عليه أيقونة الآلة التي ستنتقل إليها: أيقونة <strong>الأورغ (لوحة مفاتيح)</strong> وأنت على العود، وأيقونة <strong>العود</strong> وأنت على الأورغ؛ اضغطه لتبديل الآلة. اختيارك يُحفظ ويبقى لحين تغييره.</p>
+      <div style="display:flex; gap:14px; align-items:center; justify-content:center; margin:14px 0; flex-wrap:wrap;">
+        <img loading="lazy" decoding="async" src="images/help/help_39.jpg" alt="زر الأورغ (يظهر وأنت على العود)" style="width:120px; border-radius:8px;"/>
+        <img loading="lazy" decoding="async" src="images/help/help_40.jpg" alt="زر العود (يظهر وأنت على الأورغ)" style="width:120px; border-radius:8px;"/>
+      </div>
       <p>🔹 <strong>المفاتيح:</strong> ٢٢ مفتاحاً أبيض من الفا إلى الفا بالإضافة إلى المفاتيح السوداء. المفاتيح الزرقاء هي نغمات المقام أو السلم أو الكورد المعروض، والأحمر هو النغمة الحالية أثناء التشغيل. اضغط أي مفتاح مضاء لتسمع نغمته.</p>
-      <p>🔹 <strong>علامة نصف البيمول على المفتاح:</strong> تعني أن النغمة أخفض بربع تون عن المفتاح نفسه.</p>
-      <p>🔹 <strong>لوحة SCALE SETTING (في المقامات العربية فقط):</strong> اثنا عشر زراً تقابل النغمات من دو إلى سي. الزر المضاء (لمبته حمراء) يعني أن عليك خفض هذه النغمة ربع تون في أورغك قبل أن تعزف المقام. اللوحة للعرض فقط ولا تُضغط. في مقام الراست عند النزول تنخفض الدرجة السابعة ربع تون فتتغير إضاءة اللوحة تبعاً لذلك.</p>
-      <p>🔹 <strong>ما يختفي وما يبقى:</strong> عند عرض الأورغ تختفي أزرار عدد الأوتار واليد اليمنى/اليسرى لأنها خاصة بالعود، وتبقى أزرار الميكروفون والنغمة المستمرة/القصيرة وزر «المفضلة» (في مكانه نفسه، محاذياً لنهاية الأورغ)، وتعمل ميزة «التحقق من عزفك» على الأورغ بنفس الألوان.</p>
     </div>
 
 
@@ -11261,7 +11262,7 @@ document.getElementById('shared-playBtn').onclick = async function() {
 
     <div class="help-section" id="help-sec-en-1">
       <h3>1. Language Toggle Button</h3>
-      <p>Next to the help button below the fretboard, there's a button that switches the entire site's language between <strong>Arabic</strong> and <strong>English</strong> — its text automatically alternates between the current language's name in Arabic and in English (e.g. "Arabic" ↔ "عربي"), so it's clear to any visitor regardless of which script they read.</p>
+      <p>Next to the help button below the fretboard, there's a button that switches the entire site's language between <strong>Arabic</strong> and <strong>English</strong> — it shows a <strong>globe icon 🌐</strong> that is universally recognised, so it's clear to any visitor regardless of which script they read.</p>
       <p>🔹 Press the button to switch language instantly (the page reloads automatically to apply the new language everywhere).</p>
       <p>🔹 Your choice is saved and stays even if you close the browser and come back later.</p>
       <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_21.jpg" alt="Language toggle button as shown in English mode" style="width:120px;border-radius:6px;display:block;margin:8px auto;"/></div>
@@ -11354,7 +11355,7 @@ document.getElementById('shared-playBtn').onclick = async function() {
 
     <div class="help-section" id="help-sec-en-13">
       <h3>13. Playing a Single Note by Tapping</h3>
-      <p>Besides playing the whole scale or maqam with the player buttons, you can hear any single note directly from the fretboard by tapping it. A small button next to the microphone button (above the start of the neck) sets which behavior tapping produces — tap it to switch between:</p>
+      <p>Besides playing the whole scale or maqam with the player buttons, you can hear any single note directly from the fretboard by tapping it. A small button next to the microphone button (above the start of the neck) sets which behavior tapping produces — tap it to switch between the two modes below. <strong>The button shows the mode you will switch to when you press it</strong>, not the current one (if it reads "Short note", the current mode is sustained, and pressing it switches to short):</p>
       <div style="display:flex; gap:14px; align-items:center; justify-content:center; margin:14px 0; flex-wrap:wrap;">
         <img loading="lazy" decoding="async" src="images/help/help_32.jpg" alt="Sustained note button" style="max-width:180px; border-radius:8px;"/>
         <img loading="lazy" decoding="async" src="images/help/help_33.jpg" alt="Short note button" style="max-width:180px; border-radius:8px;"/>
@@ -11462,10 +11463,10 @@ document.getElementById('shared-playBtn').onclick = async function() {
     <div class="help-section" id="help-sec-en-19">
       <h3>19. Favorites</h3>
       <p>A feature that lets you save any maqam together with its letter that you use often, so you can jump back to it later with one tap instead of browsing the list every time.</p>
-      <p>🔹 <strong>Where to find it:</strong> a button labelled "Favorites" in the button row below the fretboard, between the "Oud/Organ" and "Dark/Light" buttons. It stays in exactly the same place when you switch between the oud and the organ.</p>
-      <div class="help-svg-wrap" style="text-align:center"><span style="display:inline-block;padding:10px 30px;background:#a3d0ec;border:2px solid #3ab4e8;border-radius:14px;color:#0a2f52;font-weight:800;font-family:'Cairo',sans-serif;">Favorites</span></div>
-      <p>🔹 <strong>Adding:</strong> after choosing the maqam you want on the fretboard, tap the "Favorites" button, then choose "➕ Add current to favorites" — a quick confirmation appears once it's saved.</p>
-      <p>🔹 <strong>Opening and jumping to one:</strong> tap the "Favorites" button, then choose "📂 Open favorites" to see a list of everything saved (maqam and letter for each item). Tap any item to jump straight to it on the fretboard.</p>
+      <p>🔹 <strong>Where to find it:</strong> a button with a <strong>star icon ⭐</strong> in the button row below the fretboard, beside the appearance button (moon/sun) and the oud/organ switch button. It stays in exactly the same place when you switch between the oud and the organ.</p>
+      <div class="help-svg-wrap" style="text-align:center"><span style="display:inline-block;padding:10px 30px;background:#a3d0ec;border:2px solid #3ab4e8;border-radius:14px;color:#0a2f52;font-weight:800;font-family:'Cairo',sans-serif;">⭐</span></div>
+      <p>🔹 <strong>Adding:</strong> after choosing the maqam you want on the fretboard, tap the star button ⭐, then choose "➕ Add current to favorites" — a quick confirmation appears once it's saved.</p>
+      <p>🔹 <strong>Opening and jumping to one:</strong> tap the star button ⭐, then choose "📂 Open favorites" to see a list of everything saved (maqam and letter for each item). Tap any item to jump straight to it on the fretboard.</p>
       <p>🔹 <strong>Deleting:</strong> tap ✕ next to any item in the favorites list to remove it.</p>
       <p>🔹 <strong>In Western scales:</strong> the button keeps two separate lists, apart from the Arabic one: <strong>Scales</strong> (root and scale type) and <strong>Chords</strong> (chord, its degree and scale). It saves to the list that matches what you are viewing right now: a regular scale or a chord. In the list window, switch between "Scales" and "Chords" with the buttons at the top.</p>
       <p>🔹 <strong>Exercise mode:</strong> in both Arabic maqamat and Western scales the Favorites button stays visible but disabled (dimmed) while exercise mode is on, and works again when you turn it off.</p>
@@ -11476,17 +11477,18 @@ document.getElementById('shared-playBtn').onclick = async function() {
       <h3>20. Dark mode (app appearance)</h3>
       <p>The app has a dark appearance that is easier on the eyes in low light, alongside the light appearance.</p>
       <p>🔹 <strong>Automatic:</strong> the app follows your device setting — dark if your device is in dark mode, light if it is in light mode.</p>
-      <p>🔹 <strong>Appearance button:</strong> in the button row below the fretboard, on the same side as the microphone button (beside the "Favorites" button) it shows the current appearance: <strong>"Dark"</strong> or <strong>"Light"</strong>. Tap it to switch between them at any time; your choice is saved on your device.</p>
+      <p>🔹 <strong>Appearance button:</strong> in the button row below the fretboard, on the same side as the microphone button (beside the "Favorites" button) it shows an icon of the appearance you will switch to: a <strong>moon 🌙</strong> (the current appearance is light, pressing makes it dark) or a <strong>sun ☀️</strong> (the current appearance is dark, pressing makes it light). Tap it to switch between them at any time; your choice is saved on your device.</p>
     </div>
 
     <div class="help-section" id="help-sec-en-21">
       <h3>21. Organ (alternative to the oud fretboard)</h3>
       <p>You can show maqamat, scales and chords on organ keys instead of the oud fretboard — useful if you play an organ that supports quarter tones.</p>
-      <p>🔹 <strong>Switch button:</strong> in the button row below the fretboard (between the "Favorites" and "Rate" buttons); it shows the instrument currently displayed: "Oud" while the oud is shown and "Organ" while the organ is shown; press it to switch. Your choice is remembered.</p>
+      <p>🔹 <strong>Switch button:</strong> in the button row below the fretboard (between the "Favorites" and "Rate" buttons); it shows an icon of the instrument you will switch to: the <strong>organ (keyboard)</strong> icon while the oud is shown, and the <strong>oud</strong> icon while the organ is shown; press it to switch. Your choice is remembered.</p>
+      <div style="display:flex; gap:14px; align-items:center; justify-content:center; margin:14px 0; flex-wrap:wrap;">
+        <img loading="lazy" decoding="async" src="images/help/help_39.jpg" alt="Organ button (shown while the oud is displayed)" style="width:120px; border-radius:8px;"/>
+        <img loading="lazy" decoding="async" src="images/help/help_40.jpg" alt="Oud button (shown while the organ is displayed)" style="width:120px; border-radius:8px;"/>
+      </div>
       <p>🔹 <strong>Keys:</strong> 22 white keys from F to F plus the black keys. Blue keys are the notes of the displayed maqam, scale or chord; red is the current note during playback. Press any lit key to hear its note.</p>
-      <p>🔹 <strong>Half-flat sign on a key:</strong> the note is a quarter tone lower than the key itself.</p>
-      <p>🔹 <strong>SCALE SETTING panel (Arabic maqamat only):</strong> twelve buttons for the notes C to B. A lit button (red LED) means you should lower that note by a quarter tone on your keyboard before playing the maqam. The panel is display-only and cannot be pressed. In Rast, the 7th degree drops a quarter tone on the way down, so the panel lights change accordingly.</p>
-      <p>🔹 <strong>What hides and what stays:</strong> with the organ shown, the string-count and right/left-hand buttons are hidden because they belong to the oud; the microphone, sustained/short-note and "Favorites" buttons stay (Favorites in the same place, flush with the end of the organ), and "Verify my playing" works on the organ with the same colours.</p>
     </div>
 
 
@@ -11876,8 +11878,8 @@ function brAdopt(id, L) {
 }
 
 // ===== أيقونات الأزرار (SVG): تعرض ما سيحدث بعد الضغط =====
-const BTN_ICONS = {"oud": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-10.6 -4.9 79.5 79.5\"><g transform=\"rotate(45 32 32)\" fill=\"none\" stroke=\"#0a2f52\" stroke-width=\"2.8\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M32 28C20 33 7 44 7 57C7 68 18 76 32 76C46 76 57 68 57 57C57 44 44 33 32 28Z\" fill=\"#fff\"/><rect x=\"28\" y=\"6\" width=\"8\" height=\"26\" fill=\"#fff\"/><path d=\"M26 6H38V-6C38 -9 36 -10 34 -10H30C28 -10 26 -9 26 -6Z\" fill=\"#fff\"/><path d=\"M23 -3H26M23 3H26M38 -3H41M38 3H41\" stroke-width=\"2.6\"/><polygon points=\"32.0,39.0 33.9,42.1 37.3,40.7 37.0,44.4 40.6,45.2 38.2,48.0 40.6,50.8 37.0,51.6 37.3,55.3 33.9,53.9 32.0,57.0 30.1,53.9 26.7,55.3 27.0,51.6 23.4,50.8 25.8,48.0 23.4,45.2 27.0,44.4 26.7,40.7 30.1,42.1\" fill=\"#fff\" stroke-width=\"2.2\"/><circle cx=\"19\" cy=\"62\" r=\"3.6\"/><circle cx=\"45\" cy=\"62\" r=\"3.6\"/><path d=\"M25 68H39\" stroke-width=\"3\"/><path d=\"M30 -4V68M32 -4V68M34 -4V68\" stroke-width=\"1.2\"/></g></svg>", "organ": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"1.0 1.0 62.0 62.0\"><g stroke=\"#0a2f52\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><rect x=\"4\" y=\"14\" width=\"56\" height=\"36\" rx=\"4\" fill=\"#fff\"/><path d=\"M16.4 50V14M26.8 50V14M37.2 50V14M47.6 50V14\" stroke-width=\"1.8\" fill=\"none\"/><rect x=\"12.9\" y=\"14\" width=\"7\" height=\"21\" fill=\"#0a2f52\"/><rect x=\"23.3\" y=\"14\" width=\"7\" height=\"21\" fill=\"#0a2f52\"/><rect x=\"44.1\" y=\"14\" width=\"7\" height=\"21\" fill=\"#0a2f52\"/></g></svg>", "moon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"4.5 4.3 56.0 56.0\"><path d=\"M40 8A25 25 0 1 0 56 44A20 20 0 0 1 40 8Z\" fill=\"#0a2f52\"/><path d=\"M50 12l1.6 3.6L55 17l-3.4 1.4L50 22l-1.6-3.6L45 17l3.4-1.4Z\" fill=\"#0a2f52\"/></svg>", "sun": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"3.0 3.0 58.0 58.0\"><g stroke=\"#0a2f52\" stroke-width=\"4\" stroke-linecap=\"round\"><circle cx=\"32\" cy=\"32\" r=\"11\" fill=\"#0a2f52\"/><path d=\"M32 6v7M32 51v7M6 32h7M51 32h7M13.6 13.6l5 5M45.4 45.4l5 5M13.6 50.4l5-5M45.4 18.6l5-5\"/></g></svg>", "globe": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"4.0 4.0 56.0 56.0\"><g fill=\"none\" stroke=\"#0a2f52\" stroke-width=\"3.4\" stroke-linecap=\"round\"><circle cx=\"32\" cy=\"32\" r=\"25\"/><ellipse cx=\"32\" cy=\"32\" rx=\"11\" ry=\"25\"/><path d=\"M7 32h50M11 18h42M11 46h42\"/></g></svg>", "star": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><path d=\"M32 5L40.2 23.4L60 25.6L45.2 39L49.4 58.6L32 48.6L14.6 58.6L18.8 39L4 25.6L23.8 23.4Z\" fill=\"#f2c14e\" stroke=\"#0a2f52\" stroke-width=\"3.4\" stroke-linejoin=\"round\"/></svg>"};
-function iconUri(n, dk) { let src = BTN_ICONS[n]; if (dk) { src = src.split('#0a2f52').join('#e6eefa'); if (n === 'organ' || n === 'oud') src = src.split('#fff').join('#33495f'); } return 'data:image/svg+xml;utf8,' + encodeURIComponent(src); }
+const BTN_ICONS = {"oud": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-10.6 -4.9 79.5 79.5\"><g transform=\"rotate(45 32 32)\" fill=\"none\" stroke=\"#0a2f52\" stroke-width=\"2.8\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M32 28C20 33 7 44 7 57C7 68 18 76 32 76C46 76 57 68 57 57C57 44 44 33 32 28Z\" fill=\"#fff\"/><rect x=\"28\" y=\"6\" width=\"8\" height=\"26\" fill=\"#fff\"/><path d=\"M26 6H38V-6C38 -9 36 -10 34 -10H30C28 -10 26 -9 26 -6Z\" fill=\"#fff\"/><path d=\"M23 -3H26M23 3H26M38 -3H41M38 3H41\" stroke-width=\"2.6\"/><polygon points=\"32.0,39.0 33.9,42.1 37.3,40.7 37.0,44.4 40.6,45.2 38.2,48.0 40.6,50.8 37.0,51.6 37.3,55.3 33.9,53.9 32.0,57.0 30.1,53.9 26.7,55.3 27.0,51.6 23.4,50.8 25.8,48.0 23.4,45.2 27.0,44.4 26.7,40.7 30.1,42.1\" fill=\"#fff\" stroke-width=\"2.2\"/><circle cx=\"19\" cy=\"62\" r=\"3.6\"/><circle cx=\"45\" cy=\"62\" r=\"3.6\"/><path d=\"M25 68H39\" stroke-width=\"3\"/><path d=\"M30 -4V68M32 -4V68M34 -4V68\" stroke-width=\"1.2\"/></g></svg>", "organ": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-2 0 76 48\"><rect x=\"2\" y=\"4\" width=\"68\" height=\"40\" rx=\"5\" fill=\"#fff\" stroke=\"OUTC\" stroke-width=\"3.4\"/><g stroke=\"#0a2f52\" stroke-width=\"1.7\" fill=\"none\"><path d=\"M10.5 4V44\"/><path d=\"M19.0 4V44\"/><path d=\"M27.5 4V44\"/><path d=\"M36.0 4V44\"/><path d=\"M44.5 4V44\"/><path d=\"M53.0 4V44\"/><path d=\"M61.5 4V44\"/></g><rect x=\"7.6\" y=\"4\" width=\"5.8\" height=\"25\" rx=\"1\" fill=\"#0a2f52\"/><rect x=\"16.1\" y=\"4\" width=\"5.8\" height=\"25\" rx=\"1\" fill=\"#0a2f52\"/><rect x=\"33.1\" y=\"4\" width=\"5.8\" height=\"25\" rx=\"1\" fill=\"#0a2f52\"/><rect x=\"41.6\" y=\"4\" width=\"5.8\" height=\"25\" rx=\"1\" fill=\"#0a2f52\"/><rect x=\"50.1\" y=\"4\" width=\"5.8\" height=\"25\" rx=\"1\" fill=\"#0a2f52\"/><rect x=\"2\" y=\"4\" width=\"68\" height=\"40\" rx=\"5\" fill=\"none\" stroke=\"OUTC\" stroke-width=\"3.4\"/></svg>", "moon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"4.5 4.3 56.0 56.0\"><path d=\"M40 8A25 25 0 1 0 56 44A20 20 0 0 1 40 8Z\" fill=\"#0a2f52\"/><path d=\"M50 12l1.6 3.6L55 17l-3.4 1.4L50 22l-1.6-3.6L45 17l3.4-1.4Z\" fill=\"#0a2f52\"/></svg>", "sun": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"3.0 3.0 58.0 58.0\"><g stroke=\"#0a2f52\" stroke-width=\"4\" stroke-linecap=\"round\"><circle cx=\"32\" cy=\"32\" r=\"11\" fill=\"#0a2f52\"/><path d=\"M32 6v7M32 51v7M6 32h7M51 32h7M13.6 13.6l5 5M45.4 45.4l5 5M13.6 50.4l5-5M45.4 18.6l5-5\"/></g></svg>", "globe": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"4.0 4.0 56.0 56.0\"><g fill=\"none\" stroke=\"#0a2f52\" stroke-width=\"3.4\" stroke-linecap=\"round\"><circle cx=\"32\" cy=\"32\" r=\"25\"/><ellipse cx=\"32\" cy=\"32\" rx=\"11\" ry=\"25\"/><path d=\"M7 32h50M11 18h42M11 46h42\"/></g></svg>", "star": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><path d=\"M32 5L40.2 23.4L60 25.6L45.2 39L49.4 58.6L32 48.6L14.6 58.6L18.8 39L4 25.6L23.8 23.4Z\" fill=\"#f2c14e\" stroke=\"#0a2f52\" stroke-width=\"3.4\" stroke-linejoin=\"round\"/></svg>"};
+function iconUri(n, dk) { let src = BTN_ICONS[n]; if (n === 'organ') src = src.split('OUTC').join(dk ? '#e6eefa' : '#0a2f52'); else if (dk) { src = src.split('#0a2f52').join('#e6eefa'); if (n === 'oud') src = src.split('#fff').join('#33495f'); } return 'data:image/svg+xml;utf8,' + encodeURIComponent(src); }
 function applyIcons() {
   const NSV = 'http://www.w3.org/2000/svg';
   const dark = !!(window.oudTheme && window.oudTheme.effective() === 'dark');
@@ -11894,9 +11896,11 @@ function applyIcons() {
     if (!im) { im = document.createElementNS(NSV, 'image'); im.setAttribute('class', 'btnIcon'); im.style.pointerEvents = 'none'; g.appendChild(im); }
     const x = +r.getAttribute('x'), y = +r.getAttribute('y'), w = +r.getAttribute('width'), h = +r.getAttribute('height');
     if (!(w > 0 && h > 0)) return;
-    const s = Math.min(h * (n === 'oud' ? 0.9 : 0.74), w * 0.74);
+    const asp = (n === 'organ') ? 76 / 48 : 1;
+    let ih = Math.min(h * (n === 'oud' ? 0.9 : (n === 'organ' ? 0.74 : 0.74)), w * 0.74), iw = ih * asp;
+    if (iw > w * 0.78) { iw = w * 0.78; ih = iw / asp; }
     if (im.getAttribute('href') !== iconUri(n, dark)) im.setAttribute('href', iconUri(n, dark));
-    im.setAttribute('x', x + w / 2 - s / 2); im.setAttribute('y', y + h / 2 - s / 2); im.setAttribute('width', s); im.setAttribute('height', s);
+    im.setAttribute('x', x + w / 2 - iw / 2); im.setAttribute('y', y + h / 2 - ih / 2); im.setAttribute('width', iw); im.setAttribute('height', ih);
   });
   const fb = document.getElementById('favBtn');
   if (fb) {
