@@ -5457,23 +5457,24 @@ function buildOudStatic(){
   const helpXB2 = OUD.fretX(10);
   const oldHelpBx = (helpXA + helpXB2) / 2; // موقع زر المساعدة القديم (هنا هيصير مكان أزرار اليد الجديد)
   const oldHelpY = OUD.neckBottomY(oldHelpBx) + 60;
-  const handScaleForHelp = 1.45, handGapForHelp = 14;
+  const BTN_K = 1.15; // معامل تكبير موحّد لكل الأزرار (الصف العلوي والسفلي)
+  const handScaleForHelp = 1.45 * BTN_K, handGapForHelp = 14;
   const helpBtnW = 118 * handScaleForHelp; // نفس عرض زر "يمين" بالضبط
   const helpBtnH = 66 * handScaleForHelp; // نفس ارتفاع زر "يمين" بالضبط
-  const helpBx_outer = oldHelpBx - (helpBtnW/2 + handGapForHelp/2) + 20 + 87; // زر اللغة يرتبط بهذا الموقع (يضل تحت الزند، ما تغيّر)
+  const helpBx_outer = oldHelpBx - (helpBtnW/2 + handGapForHelp/2) + 20 + 87 + 2 * 118 * 1.45 * (BTN_K - 1); // زر اللغة يرتبط بهذا الموقع (يضل تحت الزند، ما تغيّر)
   // موقع زر المساعدة (تحت الزند، مكانه الأصلي) — عنصر SVG جوّا مجموعة g2 اللي تنعكس
   // تلقائياً ككل بوضع اليمين، فنستخدم الإحداثي الطبيعي مباشرة بدون حساب انعكاس يدوي هنا
   const naturalBelowNeckX = helpBx_outer - helpBtnW - handGapForHelp;
   const helpBx = naturalBelowNeckX;
-  const helpY = OUD.neckBottomY(oldHelpBx) + 60 + 25 + 37; // +37: الصف السفلي أنزل قليلاً ليعطي لوحة الأورغ مسافة أمان
+  const helpY = OUD.neckBottomY(oldHelpBx) + 60 + 25 + 37 + 66 * 1.45 * (BTN_K - 1) / 2; // +37: الصف السفلي أنزل قليلاً ليعطي لوحة الأورغ مسافة أمان
   // موقع زر المايك (فوق الزند، بين فريت ٠ وفريت ١) — نفس الموقع بالضبط اللي كان زر
   // المساعدة فيه وأثبت المستخدم إنه يظهر صح بالمتصفح الحقيقي. زر المايك عنصر HTML خارجي
   // (مو جزء من مجموعة g2 اللي تنعكس تلقائياً)، فنحسب انعكاسه يدوياً بنفس محور انعكاس g2
   const midXForHelpRow = (OUD.NUT_X + OUD.NECK_END_X) / 2;
   const mirrorXForHelpRow = (x) => 2 * midXForHelpRow - x;
-  const naturalAboveNeckX = OUD.VISUAL_NUT_X + 15 - 22; // بداية الزند (تأكّد الموضع مع يوسف عبر معاينة فعلية)
+  const naturalAboveNeckX = OUD.VISUAL_NUT_X + 15 - 22 - 118 * 1.45 * (BTN_K - 1) / 2; // بداية الزند (تأكّد الموضع مع يوسف عبر معاينة فعلية)
   const micBx = window.isLeftHanded ? naturalAboveNeckX : mirrorXForHelpRow(naturalAboveNeckX);
-  const micBy = OUD.neckTopY(naturalAboveNeckX) - 103; // نفس ارتفاع صف زر يمين/يسار وعدد الأوتار (فوق الزند)
+  const micBy = OUD.neckTopY(naturalAboveNeckX) - 103 - 66 * 1.45 * (BTN_K - 1) / 2; // نفس ارتفاع صف زر يمين/يسار وعدد الأوتار (فوق الزند)
   const modeBtnW = 118 * handScaleForHelp; // زر وضع النغمات ("نغمة مستمرة"/"Sustained note") — بعرض كافٍ يسع أطول كلمة إنجليزية ("Sustained") بسطر واحد بدون خروج عن حدود الزر
   const modeBtnGap = 10; // فسحة بين الزرين
   // موقع زر وضع النغمات: بجانب زر المايك مباشرة (ناحية العمق بالزند، بعيداً عن حافة الزند)،
@@ -5494,10 +5495,10 @@ function buildOudStatic(){
   }));
   const helpTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   helpTxt.setAttribute('x', helpBx);
-  helpTxt.setAttribute('y', helpY + 18);
+  helpTxt.setAttribute('y', helpY + 18 * BTN_K);
   helpTxt.setAttribute('text-anchor', 'middle');
   helpTxt.setAttribute('font-family', "Arial, sans-serif");
-  helpTxt.setAttribute('font-size', '68');
+  helpTxt.setAttribute('font-size', String(68 * BTN_K));
   helpTxt.setAttribute('font-weight', '800');
   helpTxt.setAttribute('fill', '#0a2f52');
   helpTxt.textContent = '?';
@@ -5523,10 +5524,10 @@ function buildOudStatic(){
 
   // ===== أيقونتا اختيار اليد (يمنى/يسرى) - انتقلوا لمكان زر المساعدة سابقاً (صدر العود)، وكبرنا حجمهم =====
   {
-    const handScale = 1.45; // تكبير ٤٥٪ عن الحجم الأصلي
+    const handScale = 1.45 * BTN_K; // تكبير ٤٥٪ عن الحجم الأصلي × معامل الصف
     const handW = 118 * handScale, handH = 66 * handScale, handR = 12 * handScale;
     const handGap = 14;
-    const groupShift = 20 + 87; // إزاحة يمينية بسيطة للمجموعة كاملة، عشان زر عدد الأوتار (الأبعد يساراً) ما ينقص من حافة الرسمة
+    const groupShift = 20 + 87 + 2 * 118 * 1.45 * (BTN_K - 1); // إزاحة يمينية بسيطة للمجموعة كاملة، عشان زر عدد الأوتار (الأبعد يساراً) ما ينقص من حافة الرسمة
     const midXForBtns = (OUD.NUT_X + OUD.NECK_END_X) / 2;
     const mirrorXForBtns = (x) => 2 * midXForBtns - x;
     const naturalHand1X = oldHelpBx - (handW/2 + handGap/2) + groupShift;
@@ -5536,7 +5537,7 @@ function buildOudStatic(){
     const hand1X = window.isLeftHanded ? naturalHand1X : mirrorXForBtns(naturalHand1X);
     const hand2X = window.isLeftHanded ? naturalHand2X : mirrorXForBtns(naturalHand2X);
     const hand3X = window.isLeftHanded ? naturalHand3X : mirrorXForBtns(naturalHand3X);
-    const handY = OUD.neckTopY(naturalHand1X) - 103; // بدّلنا مكانه ليصير فوق الزند (كان مكان زر المساعدة/اللغة سابقاً)
+    const handY = OUD.neckTopY(naturalHand1X) - 103 - 66 * 1.45 * (BTN_K - 1) / 2; // بدّلنا مكانه ليصير فوق الزند (كان مكان زر المساعدة/اللغة سابقاً)
 
     // أيقونة اليد: إيموجي ✋ حقيقي بدل رسمة مخصصة، معكوس أفقياً لتمثيل اليد اليسرى
     function drawPalmShape(parent, cx, cy, mirrored, active){
@@ -5743,7 +5744,7 @@ function buildOudStatic(){
 
       function fitTextToButton(word){
         t.textContent = word;
-        let fontSize = 40;
+        let fontSize = window._rowFontU || 40 * BTN_K; // نفس خط الصف السفلي (يحدده layoutBottomRow)
         t.setAttribute('font-size', fontSize);
         // نقيس العرض الفعلي المرسوم فعلياً بالخط الحقيقي بالمتصفح، ونصغّر الخط تدريجياً لين الكلمة كلها تصير داخل حدود الزر —
         // هذا أدق بكثير من افتراض حجم خط ثابت، لأن طول "English"/"إنجليزي" يختلف كثير عن اختصار حرفين زي القديم
@@ -5812,10 +5813,10 @@ function buildOudStatic(){
           fill: '#a3d0ec', stroke: '#3ab4e8', 'stroke-width': '2'
         }));
         const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        t.setAttribute('x', x); t.setAttribute('y', y + 14);
+        t.setAttribute('x', x); t.setAttribute('y', y + 14 * BTN_K);
         t.setAttribute('text-anchor', 'middle');
         t.setAttribute('font-family', "Arial, sans-serif");
-        t.setAttribute('font-size', '46');
+        t.setAttribute('font-size', String(46 * BTN_K));
         t.setAttribute('font-weight', '800');
         t.setAttribute('fill', '#0a2f52');
         t.textContent = (window.oudNoteSystem === 'letter') ? 'C' : 'Do';
@@ -11873,6 +11874,45 @@ function brAdopt(id, L) {
   if (fresh) { cands.forEach(e => { if (e !== fresh && e.parentNode === L) e.remove(); }); L.appendChild(fresh); return fresh; }
   return cands[0] || null;
 }
+
+// ===== أيقونات الأزرار (SVG): تعرض ما سيحدث بعد الضغط =====
+const BTN_ICONS = {"oud": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-10.6 -4.9 79.5 79.5\"><g transform=\"rotate(45 32 32)\" fill=\"none\" stroke=\"#0a2f52\" stroke-width=\"2.8\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M32 28C20 33 7 44 7 57C7 68 18 76 32 76C46 76 57 68 57 57C57 44 44 33 32 28Z\" fill=\"#fff\"/><rect x=\"28\" y=\"6\" width=\"8\" height=\"26\" fill=\"#fff\"/><path d=\"M26 6H38V-6C38 -9 36 -10 34 -10H30C28 -10 26 -9 26 -6Z\" fill=\"#fff\"/><path d=\"M23 -3H26M23 3H26M38 -3H41M38 3H41\" stroke-width=\"2.6\"/><polygon points=\"32.0,39.0 33.9,42.1 37.3,40.7 37.0,44.4 40.6,45.2 38.2,48.0 40.6,50.8 37.0,51.6 37.3,55.3 33.9,53.9 32.0,57.0 30.1,53.9 26.7,55.3 27.0,51.6 23.4,50.8 25.8,48.0 23.4,45.2 27.0,44.4 26.7,40.7 30.1,42.1\" fill=\"#fff\" stroke-width=\"2.2\"/><circle cx=\"19\" cy=\"62\" r=\"3.6\"/><circle cx=\"45\" cy=\"62\" r=\"3.6\"/><path d=\"M25 68H39\" stroke-width=\"3\"/><path d=\"M30 -4V68M32 -4V68M34 -4V68\" stroke-width=\"1.2\"/></g></svg>", "organ": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"1.0 1.0 62.0 62.0\"><g stroke=\"#0a2f52\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><rect x=\"4\" y=\"14\" width=\"56\" height=\"36\" rx=\"4\" fill=\"#fff\"/><path d=\"M16.4 50V14M26.8 50V14M37.2 50V14M47.6 50V14\" stroke-width=\"1.8\" fill=\"none\"/><rect x=\"12.9\" y=\"14\" width=\"7\" height=\"21\" fill=\"#0a2f52\"/><rect x=\"23.3\" y=\"14\" width=\"7\" height=\"21\" fill=\"#0a2f52\"/><rect x=\"44.1\" y=\"14\" width=\"7\" height=\"21\" fill=\"#0a2f52\"/></g></svg>", "moon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"4.5 4.3 56.0 56.0\"><path d=\"M40 8A25 25 0 1 0 56 44A20 20 0 0 1 40 8Z\" fill=\"#0a2f52\"/><path d=\"M50 12l1.6 3.6L55 17l-3.4 1.4L50 22l-1.6-3.6L45 17l3.4-1.4Z\" fill=\"#0a2f52\"/></svg>", "sun": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"3.0 3.0 58.0 58.0\"><g stroke=\"#0a2f52\" stroke-width=\"4\" stroke-linecap=\"round\"><circle cx=\"32\" cy=\"32\" r=\"11\" fill=\"#0a2f52\"/><path d=\"M32 6v7M32 51v7M6 32h7M51 32h7M13.6 13.6l5 5M45.4 45.4l5 5M13.6 50.4l5-5M45.4 18.6l5-5\"/></g></svg>", "globe": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"4.0 4.0 56.0 56.0\"><g fill=\"none\" stroke=\"#0a2f52\" stroke-width=\"3.4\" stroke-linecap=\"round\"><circle cx=\"32\" cy=\"32\" r=\"25\"/><ellipse cx=\"32\" cy=\"32\" rx=\"11\" ry=\"25\"/><path d=\"M7 32h50M11 18h42M11 46h42\"/></g></svg>", "star": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><path d=\"M32 5L40.2 23.4L60 25.6L45.2 39L49.4 58.6L32 48.6L14.6 58.6L18.8 39L4 25.6L23.8 23.4Z\" fill=\"#f2c14e\" stroke=\"#0a2f52\" stroke-width=\"3.4\" stroke-linejoin=\"round\"/></svg>"};
+function iconUri(n, dk) { let src = BTN_ICONS[n]; if (dk) { src = src.split('#0a2f52').join('#e6eefa'); if (n === 'organ' || n === 'oud') src = src.split('#fff').join('#33495f'); } return 'data:image/svg+xml;utf8,' + encodeURIComponent(src); }
+function applyIcons() {
+  const NSV = 'http://www.w3.org/2000/svg';
+  const dark = !!(window.oudTheme && window.oudTheme.effective() === 'dark');
+  const map = [[document.getElementById('svgThemeBtn'), dark ? 'sun' : 'moon'], [tg, organMode ? 'oud' : 'organ'], [document.getElementById('langToggleBtn'), 'globe']];
+  map.forEach(([g, n]) => {
+    if (!g) return;
+    const r = g.querySelector('rect'), t = g.querySelector('text'); if (!r) return;
+    if (t) t.setAttribute('display', 'none');
+    g.dataset.icon = n;
+    { const en = window.oudLanguage === 'en';
+      const lbl = { moon: en ? 'Dark mode' : 'الوضع الداكن', sun: en ? 'Light mode' : 'الوضع الفاتح', oud: en ? 'Oud' : 'عود', organ: en ? 'Organ' : 'أورغ', globe: en ? 'Language' : 'اللغة' }[n];
+      g.setAttribute('role', 'button'); g.setAttribute('aria-label', lbl); }
+    let im = g.querySelector('image.btnIcon');
+    if (!im) { im = document.createElementNS(NSV, 'image'); im.setAttribute('class', 'btnIcon'); im.style.pointerEvents = 'none'; g.appendChild(im); }
+    const x = +r.getAttribute('x'), y = +r.getAttribute('y'), w = +r.getAttribute('width'), h = +r.getAttribute('height');
+    if (!(w > 0 && h > 0)) return;
+    const s = Math.min(h * (n === 'oud' ? 0.9 : 0.74), w * 0.74);
+    if (im.getAttribute('href') !== iconUri(n, dark)) im.setAttribute('href', iconUri(n, dark));
+    im.setAttribute('x', x + w / 2 - s / 2); im.setAttribute('y', y + h / 2 - s / 2); im.setAttribute('width', s); im.setAttribute('height', s);
+  });
+  const fb = document.getElementById('favBtn');
+  if (fb) {
+    fb.dataset.icon = 'star';
+    const im = fb.querySelector('img.btnIcon');
+    if (im) { if (im.getAttribute('src') !== iconUri('star', dark)) im.setAttribute('src', iconUri('star', dark)); }
+    if (!im) {
+      fb.innerHTML = '<img class="btnIcon" alt="" style="height:74%;width:auto;max-width:74%;display:block;margin:auto;pointer-events:none" src="' + iconUri('star', dark) + '">';
+      fb.style.setProperty('display', 'flex', 'important'); fb.style.setProperty('align-items', 'center', 'important'); fb.style.setProperty('justify-content', 'center', 'important');
+    }
+  }
+}
+window.applyBtnIcons = applyIcons;
+setInterval(applyIcons, 700);
+document.addEventListener('click', () => { setTimeout(applyIcons, 30); setTimeout(applyIcons, 300); }, true);
+
 function layoutBottomRow() {
   if (!svgShown()) return;
   const lr = document.querySelector('#langToggleBtn rect');
@@ -11921,7 +11961,7 @@ function layoutBottomRow() {
   const labelOf = s => (s === fb ? fb.textContent : (s.querySelector('text') ? s.querySelector('text').textContent : '')) || '';
   const pad = Math.max(4, Wb * 0.07);
   let px = Hs * 0.42;
-  slots.forEach(s => { const w = cv.measureText(labelOf(s)).width / 100; if (w > 0) px = Math.min(px, (Wb - 2 * pad) / (w * 1.04)); });
+  slots.forEach(s => { if (s.dataset && s.dataset.icon) return; const w = cv.measureText(labelOf(s)).width / 100; if (w > 0) px = Math.min(px, (Wb - 2 * pad) / (w * 1.04)); });
   const inv = ctm.inverse(), U = v => v / ctm.a;
   const stroke = lr.getAttribute('stroke-width') || '2', rx = parseFloat(lr.getAttribute('rx')) || 16;
   const wrap = document.querySelector('.shared-oud-wrapper'), wr = wrap ? wrap.getBoundingClientRect() : { left: 0, top: 0 };
@@ -11944,6 +11984,18 @@ function layoutBottomRow() {
     text.setAttribute('x', p.x + U(Wb) / 2); text.setAttribute('y', p.y + U(Hs) / 2 + U(px) * 0.06);
     text.setAttribute('font-size', U(px));
     text.dataset.fs0 = String(U(px));
+  });
+  // توحيد خط زر اللغة وزر دو/سي مع خط الصف السفلي
+  applyIcons();
+  window._rowFontU = U(px);
+  ['langToggleBtn', 'noteSystemToggleBtn'].forEach(id => {
+    const g = document.getElementById(id); if (!g) return;
+    const r = g.querySelector('rect'), t = g.querySelector('text'); if (!r || !t) return;
+    t.setAttribute('font-size', U(px));
+    if (id === 'noteSystemToggleBtn') {
+      t.setAttribute('dominant-baseline', 'middle');
+      t.setAttribute('y', (+r.getAttribute('y')) + (+r.getAttribute('height')) / 2 + U(px) * 0.06);
+    }
   });
 }
 window.layoutBottomRow = layoutBottomRow;
