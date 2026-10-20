@@ -1376,6 +1376,7 @@ flex-shrink: 0;
     box-shadow: 0 2px 6px rgba(0,0,0,.12) !important;
     z-index: 210;
   }
+  #favBtn.fav-disabled{ opacity:.4 !important; filter:grayscale(1); cursor:not-allowed !important; pointer-events:none; }
   body:not(.hand-left-mode) #favBtn{ right: 10px !important; left: auto !important; }
   body.hand-left-mode #favBtn{ left: 10px !important; right: auto !important; }
   /* نزيح زر اختيار المقام شوي عن حافة الشاشة عشان يفسح مكان لدائرة المفضلة جنبه (بدون تراكب) */
@@ -4461,6 +4462,13 @@ function selectRootAndType(root, scaleType, letterOverride){
   if (typeof renderAll === 'function') renderAll();
 }
 window.selectRootAndType = selectRootAndType; // تصدير صريح احتياطي عشان يقدر يوصلها كود بسكربت منفصل
+// تصدير ما تحتاجه المفضلة (سلالم/كوردات) من سكربت آخر
+window.SCALES = SCALES;
+window.buildChordsForScale = buildChordsForScale;
+window.selectChord = selectChord;
+window.getCorrectNoteName = getCorrectNoteName;
+window.getRootLetterIndex = getRootLetterIndex;
+window.showDrawerMode = showDrawerMode;
 
 // فتح/إغلاق القائمة المنسدلة لاختيار المقام (الدائرة) أو الكوردات
 const circleDrawerEl = document.getElementById('c-circleWrap');
@@ -7973,6 +7981,72 @@ window.wxResume = wxResume;
     function saveArFavorites(list) {
       try { localStorage.setItem('oudArabicFavorites', JSON.stringify(list)); return true; } catch(e) { console.error('saveArFavorites failed', e); return false; }
     }
+    // ===== ثلاث قوائم مفضلة منفصلة: عربي (ar) / سلالم غربية (sc) / كوردات (ch)، لكل منها مفتاح تخزين خاص =====
+    const FAV_KEYS = { ar: 'oudArabicFavorites', sc: 'oudWesternFavorites', ch: 'oudChordFavorites' };
+    function loadFav(kind) {
+      try { const v = JSON.parse(localStorage.getItem(FAV_KEYS[kind]) || '[]'); return Array.isArray(v) ? v : []; } catch(e) { return []; }
+    }
+    function saveFav(kind, list) {
+      try { localStorage.setItem(FAV_KEYS[kind], JSON.stringify(list)); return true; } catch(e) { console.error('saveFav failed', e); return false; }
+    }
+    // نوع القائمة الحالية: تبويب المقامات = عربي؛ تبويب الغربي = كورد لو وضع الكورد فعّال وإلا سلم
+    function favKind() {
+      if (window.isArabicMode !== false) return 'ar';
+      return (window.chordModeActive && window.selectedChord) ? 'ch' : 'sc';
+    }
+    function wNoteName(root, scaleType, letterOverride) {
+      if (typeof window.getCorrectNoteName !== 'function' || typeof window.getRootLetterIndex !== 'function') return String(root);
+      return window.getCorrectNoteName(root, window.getRootLetterIndex(root, scaleType, letterOverride));
+    }
+    function wScaleName(scaleType, isEn) {
+      const raw = (window.SCALES && window.SCALES[scaleType]) ? window.SCALES[scaleType].name : scaleType;
+      return (isEn && window.SCALE_NAME_EN && window.SCALE_NAME_EN[raw]) ? window.SCALE_NAME_EN[raw] : raw;
+    }
+    // معلومات الكورد المحفوظ (الاسم والرمز) تُحسب وقت العرض ليتبع اللغة الحالية؛ buildChordsForScale تقرأ state.letterOverride فنبدّله مؤقتاً وبشكل متزامن
+    function wChordInfo(fav) {
+      if (typeof window.buildChordsForScale !== 'function' || !window.state) return null;
+      const prev = window.state.letterOverride;
+      window.state.letterOverride = (fav.letterOverride === undefined) ? null : fav.letterOverride;
+      try { return window.buildChordsForScale(fav.root, fav.scaleType).find(c => c.degree === fav.degree) || null; }
+      finally { window.state.letterOverride = prev; }
+    }
+    function wFavEquals(kind, a, b) {
+      const lo = x => (x.letterOverride === undefined ? null : x.letterOverride);
+      return a.root === b.root && a.scaleType === b.scaleType && lo(a) === lo(b) && (kind !== 'ch' || a.degree === b.degree);
+    }
+    function currentWesternFav(kind) {
+      const st = window.state;
+      const cur = { root: st.root, scaleType: st.scaleType, letterOverride: (st.letterOverride === undefined ? null : st.letterOverride) };
+      if (kind === 'ch') cur.degree = window.selectedChord.degree;
+      return cur;
+    }
+    function goToWesternFav(fav, kind) {
+      if (typeof window.selectRootAndType !== 'function') return;
+      window.exerciseActive = false;
+      if (typeof window.exStopPlayback === 'function') window.exStopPlayback();
+      if (typeof window.wxStopPlayback === 'function') window.wxStopPlayback();
+      window.wxExerciseActive = false;
+      const exTg = document.getElementById('exerciseModeToggle'); if (exTg) exTg.checked = false;
+      window.selectRootAndType(fav.root, fav.scaleType, (fav.letterOverride === undefined ? null : fav.letterOverride));
+      if (kind === 'ch') {
+        const ch = (typeof window.buildChordsForScale === 'function') ? window.buildChordsForScale(window.state.root, window.state.scaleType).find(c => c.degree === fav.degree) : null;
+        if (ch && typeof window.selectChord === 'function') window.selectChord(ch, null);
+      } else if (typeof window.showDrawerMode === 'function') {
+        window.showDrawerMode('circle');
+      }
+      if (typeof window.closeCircleDrawer === 'function') window.closeCircleDrawer();
+      closeFavList();
+    }
+    // زر المفضلة يبقى ظاهراً لكنه معطّل بوضع التمرين (عربي وغربي) للحفاظ على تناسق الصفحة
+    function favBtnSync() {
+      const b = document.getElementById('favBtn'); if (!b) return;
+      const tg = document.getElementById('exerciseModeToggle');
+      const dis = !!((tg && tg.checked) || window.exerciseActive || window.wxExerciseActive);
+      if (b.classList.contains('fav-disabled') !== dis) { b.classList.toggle('fav-disabled', dis); b.disabled = dis; b.setAttribute('aria-disabled', dis ? 'true' : 'false'); }
+      if (dis && favMiniMenu) closeFavMiniMenu();
+    }
+    setInterval(favBtnSync, 250);
+    document.addEventListener('change', (e) => { if (e.target && e.target.id === 'exerciseModeToggle') favBtnSync(); });
     function favEquals(a, b) {
       return a.fasila === b.fasila && a.maqam === b.maqam && a.harf === b.harf;
     }
@@ -8010,6 +8084,16 @@ window.wxResume = wxResume;
     }
     function addCurrentToFavorites() {
       const isEn = window.oudLanguage === 'en';
+      const kindNow = favKind();
+      if (kindNow !== 'ar') {
+        if (!window.state) return;
+        const curW = currentWesternFav(kindNow);
+        const listW = loadFav(kindNow);
+        if (listW.some(f => wFavEquals(kindNow, f, curW))) { showFavToast(isEn ? 'Already saved to favorites' : 'محفوظة مسبقاً بالمفضلة'); return; }
+        listW.push(curW);
+        showFavToast(saveFav(kindNow, listW) ? (isEn ? '✅ Added to favorites' : '✅ تمت الإضافة للمفضلة') : (isEn ? '⚠️ Could not add, please try again' : '⚠️ تعذّرت الإضافة، جرّب مرة ثانية'));
+        return;
+      }
       const current = { fasila: currentFasila, maqam: maqamSelect.value, harf: harfSelect.value };
       const list = loadArFavorites();
       if (list.some(f => favEquals(f, current))) {
@@ -8049,6 +8133,7 @@ window.wxResume = wxResume;
     }
     function openFavMiniMenu() {
       closeFavMiniMenu();
+      if (document.getElementById('favBtn').classList.contains('fav-disabled')) return;
       // نفس سلوك زر اختيار المقام وزر التبويبات بالضبط: أي ضغطة على زر المفضلة توقف فوراً
       // أي صوت شغال (سلّم عادي أو تمرين)، قبل ما نفتح القائمة المصغّرة
       if (typeof window.stopAllOudPlayback === 'function') window.stopAllOudPlayback();
@@ -8060,7 +8145,10 @@ window.wxResume = wxResume;
       menu.style.cssText = 'position:fixed; z-index:10000; background:#eaf6fc; border:1.5px solid #3ab4e8; border-radius:10px; box-shadow:0 4px 18px rgba(0,0,0,.25); overflow:hidden; min-width:200px; direction:' + (isEn ? 'ltr' : 'rtl') + '; font-family:Cairo,sans-serif;'
         + ' top:' + (rect.bottom + 6) + 'px; ' + (document.body.classList.contains('hand-left-mode') ? ('left:' + rect.left + 'px;') : ('right:' + (window.innerWidth - rect.right) + 'px;'));
       const opt1 = document.createElement('div');
-      opt1.textContent = isEn ? '➕ Add current to favorites' : '➕ إضافة الحالي للمفضلة';
+      const kindMenu = favKind();
+      opt1.textContent = kindMenu === 'ch' ? (isEn ? '➕ Add current chord to favorites' : '➕ إضافة الكورد الحالي للمفضلة')
+        : (kindMenu === 'sc' ? (isEn ? '➕ Add current scale to favorites' : '➕ إضافة السلم الحالي للمفضلة')
+        : (isEn ? '➕ Add current to favorites' : '➕ إضافة الحالي للمفضلة'));
       opt1.style.cssText = 'padding:' + favPx(10, 13) + 'px ' + favPx(12, 16) + 'px; cursor:pointer; border-bottom:1px solid #3ab4e8; font-size:' + favPx(13, 16) + 'px; color:#1a5fa8;';
       opt1.addEventListener('mouseenter', () => { opt1.style.background = '#d8eefb'; });
       opt1.addEventListener('mouseleave', () => { opt1.style.background = ''; });
@@ -8088,9 +8176,44 @@ window.wxResume = wxResume;
     function closeFavList() {
       if (favListOverlay) { favListOverlay.remove(); favListOverlay = null; }
     }
+    let favListKind = 'ar';
+    // إعدادات كل نوع: العنوان، عناوين الأعمدة، خلايا الصف، والانتقال عند الضغط
+    function favCfg(kind, isEn) {
+      if (kind === 'sc') return {
+        title: isEn ? 'Scale favorites' : 'مفضلة السلالم',
+        empty: isEn ? 'No favorite scales yet' : 'لا توجد سلالم مفضلة',
+        heads: isEn ? ['Root', 'Scale'] : ['النغمة', 'السلم'],
+        cells: f => [wNoteName(f.root, f.scaleType, f.letterOverride), wScaleName(f.scaleType, isEn)],
+        go: f => goToWesternFav(f, 'sc')
+      };
+      if (kind === 'ch') return {
+        title: isEn ? 'Chord favorites' : 'مفضلة الكوردات',
+        empty: isEn ? 'No favorite chords yet' : 'لا توجد كوردات مفضلة',
+        heads: isEn ? ['Chord', 'Degree', 'Scale'] : ['الكورد', 'الدرجة', 'السلم'],
+        cells: f => { const ci = wChordInfo(f); return [ci ? ci.name : '—', ci ? ci.roman : '', wNoteName(f.root, f.scaleType, f.letterOverride) + ' ' + wScaleName(f.scaleType, isEn)]; },
+        go: f => goToWesternFav(f, 'ch')
+      };
+      return {
+        title: isEn ? 'Favorites' : 'المفضلة',
+        empty: isEn ? 'Favorites is empty' : 'المفضلة فارغة',
+        heads: isEn ? ['Maqam', 'Letter'] : ['المقام', 'الحرف'],
+        cells: fav => {
+          const maqamName = (isEn && typeof MAQAM_NAME_EN !== 'undefined' && MAQAM_NAME_EN[fav.maqam]) ? MAQAM_NAME_EN[fav.maqam] : fav.maqam;
+          const harfName = (isEn && window.oudNoteSystem === 'letter' && typeof HARF_DISPLAY_LETTER !== 'undefined' && HARF_DISPLAY_LETTER[fav.harf])
+            ? HARF_DISPLAY_LETTER[fav.harf]
+            : (isEn && typeof HARF_DISPLAY_EN !== 'undefined' && HARF_DISPLAY_EN[fav.harf])
+            ? HARF_DISPLAY_EN[fav.harf]
+            : ((typeof HARF_DISPLAY !== 'undefined' && HARF_DISPLAY[fav.harf]) ? HARF_DISPLAY[fav.harf] : fav.harf);
+          return [maqamName, harfName];
+        },
+        go: f => goToFavorite(f)
+      };
+    }
     function renderFavList() {
       const isEn = window.oudLanguage === 'en';
-      const list = loadArFavorites();
+      const kind = favListKind;
+      const cfg = favCfg(kind, isEn);
+      const list = loadFav(kind);
       const wrap = document.createElement('div');
       wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:' + favPx(6, 16) + 'px;box-sizing:border-box;';
       // الشاشات القصيرة (جوال أفقي) نرفع الارتفاع الأقصى لـ85% عشان تظهر صفوف أكثر بعد تثبيت الرأس
@@ -8105,11 +8228,26 @@ window.wxResume = wxResume;
       box.style.cssText = 'background:#fff;border:1px solid #bfe3f5;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:' + favPx(480, 620) + 'px;width:' + favPx(98, 95) + '%;max-height:' + favBoxMaxH + ';min-height:' + favBoxMinH + ';display:flex;flex-direction:column;overflow:hidden;padding:0;direction:' + (isEn ? 'ltr' : 'rtl') + ';font-family:Cairo,sans-serif;box-sizing:border-box;';
       // رأس النافذة: العنوان مع عدّاد المحفوظات، وخط أزرق ساطع تحته
       const head = document.createElement('div');
-      head.style.cssText = 'flex:none;display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:' + (shortScreenFav ? '6px 14px' : '12px 14px') + ';border-bottom:3px solid #3ab4e8;background:#fff;';
+      head.style.cssText = 'flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:6px 10px;padding:' + (shortScreenFav ? '6px 14px' : '12px 14px') + ';border-bottom:3px solid #3ab4e8;background:#fff;';
       const title = document.createElement('span');
-      title.textContent = isEn ? 'Favorites' : 'المفضلة';
-      title.style.cssText = 'font-weight:bold;font-size:' + favPx(16, 20) + 'px;color:#1a8abf;';
+      title.textContent = cfg.title;
+      title.style.cssText = 'font-weight:bold;white-space:nowrap;font-size:' + favPx(16, 20) + 'px;color:#1a8abf;';
       head.appendChild(title);
+      // بالتبويب الغربي: تبديل سريع بين قائمة السلالم وقائمة الكوردات
+      if (kind !== 'ar') {
+        const tabs = document.createElement('span');
+        tabs.style.cssText = 'display:inline-flex;gap:4px;';
+        [['sc', isEn ? 'Scales' : 'السلالم'], ['ch', isEn ? 'Chords' : 'الكوردات']].forEach(([k, label]) => {
+          const t = document.createElement('button');
+          t.textContent = label;
+          const on = (k === kind);
+          t.style.cssText = 'cursor:pointer;border-radius:999px;padding:2px 10px;font-family:inherit;font-size:' + favPx(12, 14) + 'px;white-space:nowrap;'
+            + (on ? 'background:#1a8abf;color:#fff;border:1px solid #1a8abf;' : 'background:#eaf6fc;color:#1a5fa8;border:1px solid #bfe3f5;');
+          t.addEventListener('click', (e) => { e.stopPropagation(); if (!on) openFavList(k); });
+          tabs.appendChild(t);
+        });
+        head.appendChild(tabs);
+      }
       if (list.length) {
         const cnt = document.createElement('span');
         cnt.textContent = isEn ? (list.length + ' saved') : (list.length.toLocaleString('ar-EG') + ' محفوظة');
@@ -8130,7 +8268,7 @@ window.wxResume = wxResume;
       box.appendChild(scroller);
       if (!list.length) {
         const empty = document.createElement('div');
-        empty.textContent = isEn ? 'Favorites is empty' : 'المفضلة فارغة';
+        empty.textContent = cfg.empty;
         empty.style.cssText = 'color:#888;padding:16px 14px;';
         scroller.appendChild(empty);
       } else {
@@ -8138,16 +8276,15 @@ window.wxResume = wxResume;
         table.style.cssText = 'width:100%; border-collapse:separate; border-spacing:0; font-size:' + favPx(12, 16) + 'px;';
         const thead = document.createElement('thead');
         const headRow = document.createElement('tr');
-        (isEn ? ['Family', 'Maqam', 'Letter', 'Delete'] : ['الفصيلة', 'المقام', 'الحرف', 'حذف']).forEach((h, hiOrig) => {
-          // عمود الفصيلة محذوف من الجدول في كل الأجهزة (المقام والحرف يكفيان)
-          if (hiOrig === 0) return;
-          const hi = hiOrig - 1;
+        const dataW = Math.floor(90 / cfg.heads.length);
+        cfg.heads.concat([isEn ? 'Delete' : 'حذف']).forEach((h, hi) => {
+          const isDel = (hi === cfg.heads.length);
           const th = document.createElement('th');
           th.textContent = h;
           // فواصل بيضاء خفيفة بين العناوين (من الخلية الثانية فصاعداً، بحسب اتجاه الكتابة)
-          th.style.cssText = 'text-align:' + (hiOrig === 3 ? 'center' : (isEn ? 'left' : 'right')) + '; padding:' + favPx(8, 11) + 'px ' + favPx(6, 10) + 'px; background:#1a8abf; color:#fff; font-weight:700; position:sticky; top:0; z-index:2; white-space:nowrap;'
+          th.style.cssText = 'text-align:' + (isDel ? 'center' : (isEn ? 'left' : 'right')) + '; padding:' + favPx(8, 11) + 'px ' + favPx(6, 10) + 'px; background:#1a8abf; color:#fff; font-weight:700; position:sticky; top:0; z-index:2; white-space:nowrap;'
             + (hi > 0 ? ' border-inline-start:1px solid rgba(255,255,255,.35);' : '')
-            + (hiOrig === 3 ? ' width:1%;' : ' width:45%;');
+            + (isDel ? ' width:1%;' : ' width:' + dataW + '%;');
           headRow.appendChild(th);
         });
         thead.appendChild(headRow);
@@ -8160,31 +8297,18 @@ window.wxResume = wxResume;
           tr.style.cssText = 'cursor:pointer; background:' + zebra + ';';
           tr.addEventListener('mouseenter', () => { tr.style.background = '#f9dc9a'; });
           tr.addEventListener('mouseleave', () => { tr.style.background = zebra; });
-          const fasilaName = (isEn && typeof FAMILY_NAME_EN !== 'undefined' && FAMILY_NAME_EN[fav.fasila]) ? FAMILY_NAME_EN[fav.fasila] : fav.fasila;
-          const maqamName = (isEn && typeof MAQAM_NAME_EN !== 'undefined' && MAQAM_NAME_EN[fav.maqam]) ? MAQAM_NAME_EN[fav.maqam] : fav.maqam;
-          const harfName = (isEn && window.oudNoteSystem === 'letter' && typeof HARF_DISPLAY_LETTER !== 'undefined' && HARF_DISPLAY_LETTER[fav.harf])
-            ? HARF_DISPLAY_LETTER[fav.harf]
-            : (isEn && typeof HARF_DISPLAY_EN !== 'undefined' && HARF_DISPLAY_EN[fav.harf])
-            ? HARF_DISPLAY_EN[fav.harf]
-            : ((typeof HARF_DISPLAY !== 'undefined' && HARF_DISPLAY[fav.harf]) ? HARF_DISPLAY[fav.harf] : fav.harf);
+          const cellTexts = cfg.cells(fav);
           const cellPad = (shortScreenFav ? 5 : favPx(8, 12)) + 'px ' + favPx(6, 10) + 'px';
           // حدود داخلية ظاهرة: خط أسفل كل صف (ما عدا الأخير، يكفيه إطار النافذة)، وفاصل بين الأعمدة
           const rowBorder = ' border-bottom:1px solid #8ecde9;';
           const colBorder = ' border-inline-start:1px solid #8ecde9;';
           // الأعمدة الثلاثة بنفس اللون والحجم والوزن (بدون تمييز بين الفصيلة والمقام والحرف)
           const cellTextCss = 'color:#1a120c; font-weight:400;';
-          const cells = [
-            { text: fasilaName, css: cellTextCss },
-            { text: maqamName, css: cellTextCss },
-            { text: harfName, css: cellTextCss }
-          ];
-          cells.forEach((c, ciOrig) => {
-            if (ciOrig === 0) return;
-            const ci = ciOrig - 1;
+          cellTexts.forEach((txt, ci) => {
             const td = document.createElement('td');
-            td.textContent = c.text;
-            td.style.cssText = 'padding:' + cellPad + '; vertical-align:middle; white-space:nowrap;' + c.css + rowBorder + (ci > 0 ? colBorder : '');
-            td.addEventListener('click', () => goToFavorite(fav));
+            td.textContent = txt;
+            td.style.cssText = 'padding:' + cellPad + '; vertical-align:middle; white-space:nowrap;' + cellTextCss + rowBorder + (ci > 0 ? colBorder : '');
+            td.addEventListener('click', () => cfg.go(fav));
             tr.appendChild(td);
           });
           const delTd = document.createElement('td');
@@ -8198,10 +8322,9 @@ window.wxResume = wxResume;
           del.addEventListener('mouseleave', () => { del.style.background = '#e74c3c'; });
           del.addEventListener('click', (e) => {
             e.stopPropagation();
-            const updated = loadArFavorites().filter((_, i) => i !== idx);
-            saveArFavorites(updated);
+            saveFav(kind, loadFav(kind).filter((_, i) => i !== idx));
             closeFavList();
-            openFavList();
+            openFavList(kind);
           });
           delTd.appendChild(del);
           tr.appendChild(delTd);
@@ -8215,13 +8338,13 @@ window.wxResume = wxResume;
       document.body.appendChild(wrap);
       favListOverlay = wrap;
     }
-    function openFavList() { closeFavList(); renderFavList(); }
+    function openFavList(kind) { closeFavList(); favListKind = kind || favKind(); renderFavList(); }
     // عند تدوير الجوال والنافذة مفتوحة: نعيد حساب الأحجام (كانت تُحسب لحظة الفتح فقط فتبقى بمقاسات الاتجاه القديم)
     let favRotateTimer = null;
     function refreshFavOnRotate() {
       if (!favListOverlay) return;
       clearTimeout(favRotateTimer);
-      favRotateTimer = setTimeout(() => { if (favListOverlay) openFavList(); }, 150);
+      favRotateTimer = setTimeout(() => { if (favListOverlay) openFavList(favListKind); }, 150);
     }
     window.addEventListener('resize', refreshFavOnRotate);
     window.addEventListener('orientationchange', refreshFavOnRotate);
@@ -11035,6 +11158,8 @@ document.getElementById('shared-playBtn').onclick = async function() {
       <p>🔹 <strong>الإضافة:</strong> بعد اختيار المقام المطلوب على الزند، اضغط زر "المفضلة"، ثم اختر "➕ إضافة الحالي للمفضلة" — يظهر تأكيد فوري بنجاح الإضافة.</p>
       <p>🔹 <strong>الفتح والانتقال:</strong> اضغط زر "المفضلة"، ثم اختر "📂 فتح المفضلة" لعرض قائمة كل المحفوظات (المقام والحرف لكل عنصر). اضغط على أي عنصر للانتقال مباشرة إليه على الزند.</p>
       <p>🔹 <strong>الحذف:</strong> اضغط ✕ بجانب أي عنصر داخل قائمة المفضلة لحذفه.</p>
+      <p>🔹 <strong>في المقامات الغربية:</strong> للزر قائمتان منفصلتان عن العربي: قائمة <strong>السلالم</strong> (النغمة ونوع السلم)، وقائمة <strong>الكوردات</strong> (الكورد ودرجته وسلمه). يحفظ الزر تلقائياً القائمة المناسبة لما تعرضه الآن: سلم عادي أو كورد. ومن نافذة القائمة تبدّل بين «السلالم» و«الكوردات» من الأزرار أعلاها.</p>
+      <p>🔹 <strong>وضع التمرين:</strong> في المقامات العربية والغربية يبقى زر المفضلة ظاهراً لكنه معطّل (باهت) طوال تفعيل وضع التمرين، ويعود للعمل عند إلغائه.</p>
       <p>🔹 هذه الميزة خاصة بالمقامات العربية فقط، وتُحفظ محلياً على جهازك.</p>
     </div>
 
@@ -11310,6 +11435,8 @@ document.getElementById('shared-playBtn').onclick = async function() {
       <p>🔹 <strong>Adding:</strong> after choosing the maqam you want on the fretboard, tap the "Favorites" button, then choose "➕ Add current to favorites" — a quick confirmation appears once it's saved.</p>
       <p>🔹 <strong>Opening and jumping to one:</strong> tap the "Favorites" button, then choose "📂 Open favorites" to see a list of everything saved (maqam and letter for each item). Tap any item to jump straight to it on the fretboard.</p>
       <p>🔹 <strong>Deleting:</strong> tap ✕ next to any item in the favorites list to remove it.</p>
+      <p>🔹 <strong>In Western scales:</strong> the button keeps two separate lists, apart from the Arabic one: <strong>Scales</strong> (root and scale type) and <strong>Chords</strong> (chord, its degree and scale). It saves to the list that matches what you are viewing right now: a regular scale or a chord. In the list window, switch between "Scales" and "Chords" with the buttons at the top.</p>
+      <p>🔹 <strong>Exercise mode:</strong> in both Arabic maqamat and Western scales the Favorites button stays visible but disabled (dimmed) while exercise mode is on, and works again when you turn it off.</p>
       <p>🔹 This feature is specific to the Arabic maqamat side only, and is saved locally on your device.</p>
     </div>
 
@@ -11800,12 +11927,6 @@ function filterRoots() {
     restore(hg); restore(sg);
     if (hg) hg.style.transform = ''; if (sg) sg.style.transform = '';
     keep(hg); keep(sg);
-    // المقامات الغربية: لا مفضلة هنا — تبقى بقية الأزرار في أماكنها الأصلية (لا تتراكب مع أزرار أنواع المقامات)
-    if (window.isArabicMode === false) {
-      fb.style.setProperty('display', 'none', 'important');
-      [document.getElementById('noteModeToggleBtn'), document.getElementById('micVerifyHtmlBtn')].forEach(e => { if (e) e.style.removeProperty('translate'); });
-      return;
-    }
     fb.style.removeProperty('display');
     const b = hr.getBoundingClientRect(); if (!b.width) return;
     const sr = document.querySelector('#stringCountBtn rect'), sbr = sr ? sr.getBoundingClientRect() : null, sb = (sbr && sbr.width) ? sbr : null;
