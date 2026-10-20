@@ -5465,7 +5465,7 @@ function buildOudStatic(){
   // تلقائياً ككل بوضع اليمين، فنستخدم الإحداثي الطبيعي مباشرة بدون حساب انعكاس يدوي هنا
   const naturalBelowNeckX = helpBx_outer - helpBtnW - handGapForHelp;
   const helpBx = naturalBelowNeckX;
-  const helpY = OUD.neckBottomY(oldHelpBx) + 60 + 25;
+  const helpY = OUD.neckBottomY(oldHelpBx) + 60 + 25 + 37; // +37: الصف السفلي أنزل قليلاً ليعطي لوحة الأورغ مسافة أمان
   // موقع زر المايك (فوق الزند، بين فريت ٠ وفريت ١) — نفس الموقع بالضبط اللي كان زر
   // المساعدة فيه وأثبت المستخدم إنه يظهر صح بالمتصفح الحقيقي. زر المايك عنصر HTML خارجي
   // (مو جزء من مجموعة g2 اللي تنعكس تلقائياً)، فنحسب انعكاسه يدوياً بنفس محور انعكاس g2
@@ -11667,7 +11667,7 @@ function collect(src) {
 }
 
 // ===== الرسم =====
-let X0 = -470, CW = 1780; const CH = 315, Y0 = 141;
+let X0 = -470, CW = 1780; const CH = 327, Y0 = 131;
 let busy = false;
 function render() {
   if (busy) return; busy = true;
@@ -11738,7 +11738,7 @@ function doRender() {
   }
 
   // المفاتيح
-  const kx0 = 24, ky = 176, kh = CH - ky - 12, kw = (CW - 48) / n;
+  const kx0 = 24, ky = 158, kh = CH - ky - 12, kw = (CW - 48) / n;
   const litMap = new Map();
   const pri = nt => nt.fill === '#ffe100' ? 3 : (nt.cur ? 2 : (nt.fill === '#1B7A3D' ? 1 : 0));
   notes.forEach(nt => { const o = litMap.get(nt.midi); if (!o || pri(nt) > pri(o)) litMap.set(nt.midi, nt); });
