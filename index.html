@@ -4047,8 +4047,9 @@ const CIRCLE_ARABIC_MAJOR = ['دو','صول','رى','لا','مي','سي / دو�
 const CIRCLE_ARABIC_MINOR = ['لا','مي','سي','فا#','دو#','صول# / لا♭','رى# / مي♭','لا# / سي♭','فا','دو','صول','رى'];
 // تحدد أي نظام تسمية تستخدمه الدائرة حالياً: عربي (افتراضي دايماً باللغة العربية)، أو صولفيج/لاتيني (حسب زر Do/C بالإنجليزي)
 function getCircleNoteMode(){
+  if (window.oudNoteSystem === 'letter') return 'latin'; // نظام الحروف (C D E) يعمل بالعربية والإنجليزية
   if (window.oudLanguage !== 'en') return 'arabic';
-  return (window.oudNoteSystem === 'solfege') ? 'solfege' : 'latin';
+  return 'solfege';
 }
 
 // السلالم الثلاثة + الطبيعي
@@ -5841,14 +5842,28 @@ function buildOudStatic(){
         t.setAttribute('font-weight', '800');
         t.setAttribute('fill', '#0a2f52');
         const isEnNs = (window.oudLanguage === 'en');
-        t.textContent = (window.oudNoteSystem === 'letter') ? 'Do' : 'C'; // يعرض النظام الذي سينتقل إليه بعد الضغط
+        // الزر يعرض الاسمين معاً (C ⇄ Do / C ⇄ دو): النظام الحالي غامق والبديل باهت
+        t.setAttribute('direction', 'ltr'); t.setAttribute('font-size', String(34 * BTN_K));
+        if (!isEnNs) t.setAttribute('font-family', "'Cairo', Arial, sans-serif");
+        const nsSolfWord = isEnNs ? 'Do' : '\u062F\u0648';
+        const nsLabel = () => {
+          const isLetter = (window.oudNoteSystem === 'letter');
+          while (t.firstChild) t.removeChild(t.firstChild);
+          [['C', isLetter], [' \u21C4 ', true], [nsSolfWord, !isLetter]].forEach(([txt, on], i) => {
+            const ts = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+            ts.textContent = txt;
+            if (i !== 1) ts.setAttribute('fill-opacity', on ? '1' : '0.4');
+            if (i === 1) ts.setAttribute('font-family', "'Segoe UI Symbol','Noto Sans Symbols',Arial,sans-serif");
+            t.appendChild(ts);
+          });
+        };
+        nsLabel();
         ng.appendChild(t);
-        if (!isEnNs) { ng.classList.add('ns-off'); ng.setAttribute('aria-disabled', 'true'); ng.setAttribute('role', 'button'); ng.setAttribute('aria-label', 'تسمية النغمات بالحروف (متاح بالإنجليزية فقط)'); }
-        else ng.addEventListener('click', () => {
+        ng.addEventListener('click', () => {
           const newSystem = (window.oudNoteSystem === 'letter') ? 'solfege' : 'letter';
           window.oudNoteSystem = newSystem;
           localStorage.setItem('oudNoteSystemPref', newSystem); // يفضل مع تبديلات الجلسة (زي عدد الأوتار)، بس يُمسح صراحة عند تبديل اللغة
-          t.textContent = (newSystem === 'letter') ? 'Do' : 'C';
+          t.textContent = nsLabel();
           // نحدّث كل الأماكن المتأثرة حياً بدون إعادة تحميل الصفحة
           if (typeof window.redrawOudEverything === 'function') window.redrawOudEverything();
           if (typeof window.renderAll === 'function') window.renderAll();
@@ -5871,7 +5886,7 @@ function buildOudStatic(){
 
   const stringNames = (window.oudLanguage === 'en')
     ? ((window.oudNoteSystem === 'letter') ? ['F','A','D','G','C','F'] : ['Fa','La','Re','Sol','Do','Fa'])
-    : ['فا','لا','رى','صول','دو','فا']; // الوتر السادس (الشرار) نفس اسم الأول
+    : ((window.oudNoteSystem === 'letter') ? ['F','A','D','G','C','F'] : ['فا','لا','رى','صول','دو','فا']); // الوتر السادس (الشرار) نفس اسم الأول
   const rectSlope = (neckJointTopEndY - neckYTopAtNut) / (NECK_JOINT_END_X - OUD.VISUAL_NUT_X);
   const lineLen = 80;
 
@@ -6307,9 +6322,9 @@ function getRootLetterIndex(rootPC, scaleType, letterOverride){
 
 // تعطي الاسم الصحيح موسيقيًا (الإملاء الإنهارموني الصحيح) لنوتة معينة حسب حرفها الصحيح بالسلم
 function getCorrectNoteName(pc, letterIdx){
-  const names = (window.oudLanguage === 'en')
-    ? ((window.oudNoteSystem === 'letter') ? LETTER_NAMES_ONLY_LATIN : LETTER_NAMES_ONLY_EN)
-    : LETTER_NAMES_ONLY;
+  const names = (window.oudNoteSystem === 'letter')
+    ? LETTER_NAMES_ONLY_LATIN
+    : ((window.oudLanguage === 'en') ? LETTER_NAMES_ONLY_EN : LETTER_NAMES_ONLY);
   const naturalPC = NATURAL_PC_FOR_LETTER[letterIdx];
   const diff = ((pc - naturalPC) + 12) % 12;
   if(diff === 0) return names[letterIdx];
@@ -7940,6 +7955,19 @@ window.wxResume = wxResume;
       HARF_DISPLAY_LETTER[k] = HARF_DISPLAY_EN[k].replace(/^(Sol|La|Si|Do|Re|Mi|Fa)/, (m) => SOLFEGE_TO_LETTER_WORD[m]);
     }
     window.HARF_DISPLAY_LETTER = HARF_DISPLAY_LETTER;
+    // نسخة الحروف بالواجهة العربية: نفس الاسم العربي لكن الاسم الأساسي (دو رى مي...) يتحول لحرف لاتيني (C D E...)
+    const AR_TO_LETTER_WORD = { 'صول':'G', 'لا':'A', 'سي':'B', 'دو':'C', 'رى':'D', 'مي':'E', 'فا':'F' };
+    const HARF_DISPLAY_LETTER_AR = {};
+    for (const k in HARF_DISPLAY) {
+      HARF_DISPLAY_LETTER_AR[k] = HARF_DISPLAY[k].replace(/^(صول|لا|سي|دو|رى|مي|فا)/, (m) => AR_TO_LETTER_WORD[m]);
+    }
+    window.HARF_DISPLAY_LETTER_AR = HARF_DISPLAY_LETTER_AR;
+    // اسم الحرف بنظام الحروف حسب لغة الواجهة (أو null لو النظام ليس حروفاً)
+    window.harfLetterName = function(k){
+      if (window.oudNoteSystem !== 'letter') return null;
+      const t = (window.oudLanguage === 'en') ? window.HARF_DISPLAY_LETTER : window.HARF_DISPLAY_LETTER_AR;
+      return (t && t[k]) || null;
+    };
 
     // تحدّث نصوص خيارات قائمة الحروف بس (حسب اللغة/نظام Do-C الحاليين)، بدون أي لمس للاختيار
     // الحالي — هذا الجزء بس اللي يحتاجه زر Do/C (تبديل طريقة الكتابة لا يفترض يغيّر الحرف المختار)
@@ -7949,9 +7977,8 @@ window.wxResume = wxResume;
         // نشيل أي علامة قديمة ("( محط المقام )" أو "( Root )") من النص الحالي أول، عشان الحساب يبدأ دايماً من نص نظيف
         const cleanCurrentText = opt.textContent.replace(/\s*\(\s*(محط المقام|Root)\s*\)\s*$/, '');
         // نستعيد النص الصحيح حسب اللغة الحالية ونظام تسمية النغمات (Do/C) — قراءة آمنة عبر window، تفادياً لمشكلة التوقيت TDZ
-        const useLetterEn = (window.oudLanguage === 'en' && window.oudNoteSystem === 'letter');
-        const correctText = (window.oudLanguage === 'en' && useLetterEn && window.HARF_DISPLAY_LETTER && window.HARF_DISPLAY_LETTER[opt.value])
-          ? window.HARF_DISPLAY_LETTER[opt.value]
+        const correctText = window.harfLetterName(opt.value)
+          ? window.harfLetterName(opt.value)
           : (window.oudLanguage === 'en' && window.HARF_DISPLAY_EN && window.HARF_DISPLAY_EN[opt.value])
           ? window.HARF_DISPLAY_EN[opt.value]
           : (window.HARF_DISPLAY && window.HARF_DISPLAY[opt.value]) || cleanCurrentText;
@@ -8106,8 +8133,8 @@ window.wxResume = wxResume;
     function favLabel(fav) {
       const isEnLbl = window.oudLanguage === 'en';
       const maqamName = (isEnLbl && typeof MAQAM_NAME_EN !== 'undefined' && MAQAM_NAME_EN[fav.maqam]) ? MAQAM_NAME_EN[fav.maqam] : fav.maqam;
-      const harfNameBase = (isEnLbl && window.oudNoteSystem === 'letter' && typeof HARF_DISPLAY_LETTER !== 'undefined' && HARF_DISPLAY_LETTER[fav.harf])
-        ? HARF_DISPLAY_LETTER[fav.harf]
+      const harfNameBase = (window.harfLetterName && window.harfLetterName(fav.harf))
+        ? window.harfLetterName(fav.harf)
         : (isEnLbl && typeof HARF_DISPLAY_EN !== 'undefined' && HARF_DISPLAY_EN[fav.harf])
         ? HARF_DISPLAY_EN[fav.harf]
         : ((typeof HARF_DISPLAY !== 'undefined' && HARF_DISPLAY[fav.harf]) ? HARF_DISPLAY[fav.harf] : fav.harf);
@@ -8252,8 +8279,8 @@ window.wxResume = wxResume;
         heads: isEn ? ['Maqam', 'Letter'] : ['المقام', 'الحرف'],
         cells: fav => {
           const maqamName = (isEn && typeof MAQAM_NAME_EN !== 'undefined' && MAQAM_NAME_EN[fav.maqam]) ? MAQAM_NAME_EN[fav.maqam] : fav.maqam;
-          const harfName = (isEn && window.oudNoteSystem === 'letter' && typeof HARF_DISPLAY_LETTER !== 'undefined' && HARF_DISPLAY_LETTER[fav.harf])
-            ? HARF_DISPLAY_LETTER[fav.harf]
+          const harfName = (window.harfLetterName && window.harfLetterName(fav.harf))
+            ? window.harfLetterName(fav.harf)
             : (isEn && typeof HARF_DISPLAY_EN !== 'undefined' && HARF_DISPLAY_EN[fav.harf])
             ? HARF_DISPLAY_EN[fav.harf]
             : ((typeof HARF_DISPLAY !== 'undefined' && HARF_DISPLAY[fav.harf]) ? HARF_DISPLAY[fav.harf] : fav.harf);
@@ -8676,8 +8703,9 @@ window.wxResume = wxResume;
     const BASE_NAME_AR_TO_EN = { 'دو':'Do', 'رى':'Re', 'مي':'Mi', 'فا':'Fa', 'صول':'Sol', 'لا':'La', 'سي':'Si' };
     const BASE_NAME_AR_TO_LETTER = { 'دو':'C', 'رى':'D', 'مي':'E', 'فا':'F', 'صول':'G', 'لا':'A', 'سي':'B' };
     function displayBaseName(arabicText){
+      if (window.oudNoteSystem === 'letter') return BASE_NAME_AR_TO_LETTER[arabicText] || arabicText;
       if (window.oudLanguage !== 'en') return arabicText;
-      return (window.oudNoteSystem === 'letter') ? (BASE_NAME_AR_TO_LETTER[arabicText] || arabicText) : (BASE_NAME_AR_TO_EN[arabicText] || arabicText);
+      return BASE_NAME_AR_TO_EN[arabicText] || arabicText;
     }
 
     function getDegreeNameAndAcc(degIdx, startPos, quartersFromSol, maqamName, isDescending) {
@@ -8927,7 +8955,7 @@ window.wxResume = wxResume;
         );
 
         if (acc) {
-          const isEnglishMode = (window.oudLanguage === 'en');
+          const isEnglishMode = (window.oudLanguage === 'en' || window.oudNoteSystem === 'letter'); // الرمز يلحق الحرف اللاتيني يميناً
           const label = document.createElementNS(ns2, 'text');
           label.setAttribute('x', isEnglishMode ? (x - 9) : (x + 9));
           label.setAttribute('y', y + 7);
@@ -10530,8 +10558,8 @@ window.wxResume = wxResume;
         const arHarfLabelEl3 = document.getElementById('arHarfLabel');
         if (arHarfLabelEl3) {
           const isEnHarf = window.oudLanguage === 'en';
-          const harfDisplayName = (isEnHarf && window.oudNoteSystem === 'letter' && typeof HARF_DISPLAY_LETTER !== 'undefined' && HARF_DISPLAY_LETTER[harf])
-            ? HARF_DISPLAY_LETTER[harf]
+          const harfDisplayName = (window.harfLetterName && window.harfLetterName(harf))
+            ? window.harfLetterName(harf)
             : (isEnHarf && typeof HARF_DISPLAY_EN !== 'undefined' && HARF_DISPLAY_EN[harf])
             ? HARF_DISPLAY_EN[harf]
             : ((typeof HARF_DISPLAY !== 'undefined' && HARF_DISPLAY[harf]) ? HARF_DISPLAY[harf] : harf);
@@ -11619,8 +11647,9 @@ const BASE_AR = { 0: 'دو', 2: 'رى', 4: 'مي', 5: 'فا', 7: 'صول', 9: '�
 const BASE_EN = { 0: 'Do', 2: 'Re', 4: 'Mi', 5: 'Fa', 7: 'Sol', 9: 'La', 11: 'Si' };
 const BASE_LT = { 0: 'C', 2: 'D', 4: 'E', 5: 'F', 7: 'G', 9: 'A', 11: 'B' };
 function baseName(pc) {
+  if (window.oudNoteSystem === 'letter') return BASE_LT[pc];
   if (window.oudLanguage !== 'en') return BASE_AR[pc];
-  return window.oudNoteSystem === 'letter' ? BASE_LT[pc] : BASE_EN[pc];
+  return BASE_EN[pc];
 }
 
 // ===== CSS =====
