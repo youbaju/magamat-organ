@@ -5636,8 +5636,8 @@ function buildOudStatic(){
       t.setAttribute('font-weight', '800');
       t.setAttribute('fill', '#0a2f52');
       t.textContent = (window.oudLanguage === 'en')
-        ? (window.isLeftHanded ? 'Left' : 'Right')
-        : (window.isLeftHanded ? 'يسار' : 'يمين');
+        ? (window.isLeftHanded ? 'Right' : 'Left')   // الزر يعرض الوضع الذي سينتقل إليه بعد الضغط
+        : (window.isLeftHanded ? 'يمين' : 'يسار');
       hg.appendChild(t);
       hg.addEventListener('click', () => {
         const newIsLeft = !window.isLeftHanded;
@@ -5693,14 +5693,14 @@ function buildOudStatic(){
     // لاحقاً)، فكان الزر يعلق دايماً على النص العربي حتى بوضع اللغة الإنجليزية
     if (typeof window.updateNoteClickModeBtnLabel === 'function') window.updateNoteClickModeBtnLabel();
 
-    // ===== زر تبديل عدد الأوتار (٥/٦) — بنفس حجم أزرار اليد، بدون أيقونة، نص يعكس الوضع الحالي =====
+    // ===== زر تبديل عدد الأوتار (٥/٦) — بنفس حجم أزرار اليد، بدون أيقونة، نص يعكس الوضع الذي سينتقل إليه بعد الضغط =====
     function makeStringCountBtn(x, y){
       const sg = el('g', { id: 'stringCountBtn', style: 'cursor:pointer;pointer-events:all;' });
       sg.appendChild(el('rect', {
         x: x - handW/2, y: y - handH/2, width: handW, height: handH, rx: handR,
         fill: '#a3d0ec', stroke: '#3ab4e8', 'stroke-width': '2'
       }));
-      const numStr = (OUD.STRING_COUNT === 6) ? '6' : '5';
+      const numStr = (OUD.STRING_COUNT === 6) ? '5' : '6'; // الزر يعرض العدد الذي سينتقل إليه بعد الضغط
       const wordStr = (window.oudLanguage === 'en') ? 'Strings' : 'أوتار';
       // الكلمة فوق (أصغر، أزرق)، والرقم تحت (أكبر، أحمر) — يصير الرقم أبرز عنصر بالزر
       const wordEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -11111,18 +11111,18 @@ document.getElementById('shared-playBtn').onclick = async function() {
 
     <div class="help-section" id="help-sec-ar-10">
       <h3>١٠. اختيار اليد اليمنى أو اليسرى</h3>
-      <p>لتسهيل العزف على العازفين الذين يستخدمون اليد اليسرى، يوفر التطبيق <strong>زر واحد</strong> فوق زند العود يعرض وضعك الحالي — "يمين" أو "يسار".</p>
-      <p>🔹 الوضع الافتراضي دائماً عند فتح التطبيق: <strong>"يمين"</strong>.</p>
-      <p>🔹 اضغط الزر لتبديل الوضع مباشرة — فإذا كان الوضع "يمين" يتحول إلى "يسار" والعكس صحيح، والعود بشكله وأوتاره ينقلب تلقائياً ليطابق طريقة إمساكك له بالضبط.</p>
+      <p>لتسهيل العزف على العازفين الذين يستخدمون اليد اليسرى، يوفر التطبيق <strong>زر واحد</strong> فوق زند العود يعرض الوضع الذي ستنتقل إليه عند الضغط عليه وليس الوضع الحالي — "يمين" أو "يسار" (فإذا كان مكتوباً عليه «يسار» فالعود الآن بوضع اليد اليمنى، والضغط عليه يحوّله إلى اليد اليسرى).</p>
+      <p>🔹 الوضع الافتراضي دائماً عند فتح التطبيق: العود بوضع <strong>اليد اليمنى</strong>، فيكتب الزر <strong>"يسار"</strong> (أي ما سيحدث إذا ضغطته).</p>
+      <p>🔹 اضغط الزر لتبديل الوضع مباشرة — فإذا كان الزر يكتب "يسار" يتحول العود إلى اليد اليسرى ويصير الزر يكتب "يمين" والعكس صحيح، والعود بشكله وأوتاره ينقلب تلقائياً ليطابق طريقة إمساكك له بالضبط.</p>
       <p>🔹 هذا التبديل <strong>بصري بحت</strong> — مواقع النغمات وأصواتها الصحيحة لا تتغير أبداً. يعمل بنفس الطريقة على المقامات العربية والسلالم الغربية معاً، ويبقى اختيارك ثابتاً عند التنقل بين التبويبين.</p>
-      <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_10.jpg" alt="زر اختيار اليد بحالته الافتراضية يمين" style="width:120px;border-radius:6px;display:block;margin:8px auto;"/></div>
+      <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_10.jpg" alt="زر اختيار اليد والعود بوضع اليد اليمنى (الزر يكتب يسار)" style="width:120px;border-radius:6px;display:block;margin:8px auto;"/></div>
     </div>
     <div class="help-section" id="help-sec-ar-11">
       <h3>١١. زر عدد الأوتار (5 أو 6)</h3>
-      <p>بجانب زر اليد مباشرة، يوجد زر يعرض عدد الأوتار الحالي — "5 أوتار" أو "6 أوتار".</p>
-      <p>🔹 الوضع الافتراضي: <strong>6 أوتار</strong> (يشمل الوتر السادس "الشرار").</p>
+      <p>بجانب زر اليد مباشرة، يوجد زر يعرض العدد الذي سينتقل إليه العود عند الضغط عليه وليس العدد الحالي — "5 أوتار" أو "6 أوتار" (فإذا كان مكتوباً عليه «5 أوتار» فالعود الآن بستة أوتار، والضغط عليه يحوّله إلى خمسة).</p>
+      <p>🔹 الوضع الافتراضي: العود بـ<strong>6 أوتار</strong> (يشمل الوتر السادس "الشرار")، فيكتب الزر <strong>"5 أوتار"</strong>.</p>
       <p>🔹 الضغط على الزر يبدّل العدد فوراً، ويعيد ضبط المقام/السلم المختار للوضع الافتراضي (بينما يبقى اتجاه اليد، الدوزان، والسرعة كما هي).</p>
-      <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_11.jpg" alt="زر عدد الأوتار بحالة 5 أوتار" style="width:120px;border-radius:6px;display:block;margin:8px auto;"/></div>
+      <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_11.jpg" alt="زر عدد الأوتار والعود بستة أوتار (الزر يكتب 5 أوتار)" style="width:120px;border-radius:6px;display:block;margin:8px auto;"/></div>
     </div>
     <div class="help-section" id="help-sec-ar-12">
       <h3>١٢. زر المساعدة (؟)</h3>
@@ -11388,19 +11388,19 @@ document.getElementById('shared-playBtn').onclick = async function() {
 
     <div class="help-section" id="help-sec-en-10">
       <h3>10. Choosing Right or Left Hand</h3>
-      <p>To make playing easier for left-handed players, the app provides <strong>a single button</strong> above the fretboard that shows your current setting — "Right" or "Left".</p>
-      <p>🔹 The default whenever you open the app is always: <strong>"Right"</strong>.</p>
-      <p>🔹 Press the button to switch immediately — if it says "Right" it becomes "Left" and vice versa, and the oud's shape and strings flip automatically to match exactly how you hold it.</p>
+      <p>To make playing easier for left-handed players, the app provides <strong>a single button</strong> above the fretboard that shows the setting you will switch to when you press it, not the current one — "Right" or "Left" (if it reads "Left", the oud is currently in right-hand mode, and pressing it switches to left-hand).</p>
+      <p>🔹 By default the oud opens in <strong>right-hand</strong> mode, so the button reads <strong>"Left"</strong> (what will happen if you press it).</p>
+      <p>🔹 Press the button to switch immediately — if it says "Left" the oud becomes left-handed and the button then says "Right", and vice versa; the oud's shape and strings flip automatically to match exactly how you hold it.</p>
       <p>🔹 This switch is <strong>purely visual</strong> — the correct note positions and sounds never change. It works the same way for both Arabic maqamat and Western scales, and your choice stays fixed when switching between the two tabs.</p>
-      <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_29.jpg" alt="Hand-selection button in its default Right state" style="width:120px;border-radius:6px;display:block;margin:8px auto;"/></div>
+      <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_29.jpg" alt="Hand-selection button while the oud is in right-hand mode (button reads Left)" style="width:120px;border-radius:6px;display:block;margin:8px auto;"/></div>
     </div>
 
     <div class="help-section" id="help-sec-en-11">
       <h3>11. String Count Button (5 or 6)</h3>
-      <p>Right beside the hand button, there's a button showing the current string count — "5 Strings" or "6 Strings".</p>
-      <p>🔹 The default is: <strong>6 strings</strong> (includes the sixth string, "Sharrar").</p>
+      <p>Right beside the hand button, there's a button showing the string count the oud will switch to when you press it, not the current one — "5 Strings" or "6 Strings" (if it reads "5 Strings", the oud currently has 6 strings, and pressing it switches to 5).</p>
+      <p>🔹 By default the oud has <strong>6 strings</strong> (includes the sixth string, "Sharrar"), so the button reads <strong>"5 Strings"</strong>.</p>
       <p>🔹 Pressing the button switches the count instantly, and resets the selected maqam/scale to its default (while hand direction, tuning, and speed stay as they were).</p>
-      <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_30.jpg" alt="String-count button showing 5 Strings" style="width:120px;border-radius:6px;display:block;margin:8px auto;"/></div>
+      <div class="help-svg-wrap"><img loading="lazy" decoding="async" src="images/help/help_30.jpg" alt="String-count button while the oud has 6 strings (button reads 5 Strings)" style="width:120px;border-radius:6px;display:block;margin:8px auto;"/></div>
     </div>
 
     <div class="help-section" id="help-sec-en-12">
