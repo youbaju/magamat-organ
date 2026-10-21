@@ -5701,7 +5701,10 @@ function buildOudStatic(){
         x: x - handW/2, y: y - handH/2, width: handW, height: handH, rx: handR,
         fill: '#a3d0ec', stroke: '#3ab4e8', 'stroke-width': '2'
       }));
-      const numStr = (OUD.STRING_COUNT === 6) ? '5' : '6'; // الزر يعرض العدد الذي سينتقل إليه بعد الضغط
+      // بوضع الأورغ يُجبَر العدد على 6 داخلياً، فنقرأ عدد أوتار العود الحقيقي المحفوظ مباشرة (بدون الطبقة الوسيطة) ليبقى النص صحيحاً وهو باهت
+      let realStrCount = OUD.STRING_COUNT;
+      try { if (localStorage.getItem('oudInstrument') === 'organ') { const raw = localStorage['organ_oudStringCountPref']; realStrCount = raw ? parseInt(raw) : 5; } } catch (e) {}
+      const numStr = (realStrCount === 6) ? '5' : '6'; // الزر يعرض العدد الذي سينتقل إليه بعد الضغط
       const wordStr = (window.oudLanguage === 'en') ? 'Strings' : 'أوتار';
       // الكلمة فوق (أصغر، أزرق)، والرقم تحت (أكبر، أحمر) — يصير الرقم أبرز عنصر بالزر
       const wordEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
