@@ -1266,6 +1266,7 @@ flex-shrink: 0;
     padding: 3px 10px;
     font-size:.7rem;
     font-weight:600;
+    white-space:nowrap;
     cursor:pointer;
     transition: all .15s;
   }
@@ -1863,6 +1864,26 @@ flex-shrink: 0;
 .social-twitter   { background: #000; }
 .social-instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); grid-column: span 2; }
 .social-privacy   { background: #4a4a4a; grid-column: span 2; }
+/* صفحة التواصل: أزرار أصغر (الأيقونة هي الأهم) */
+.social-grid{ gap:8px; }
+.social-grid a{ padding:7px 8px; gap:3px; border-radius:14px; }
+.social-grid a svg{ width:28px; height:28px; }
+@media (orientation:landscape) and (max-height:520px){
+  #page-social.active{ padding:calc(var(--tabs-h) + 6px) 16px 8px !important; }
+  .social-page-content{ max-width:560px; }
+  .social-page-content h2{ margin:0 0 6px !important; font-size:.95rem !important; }
+  .social-grid{ grid-template-columns:repeat(3,1fr) !important; gap:6px !important; }
+  .social-grid a{ padding:5px 6px !important; gap:2px !important; border-radius:12px; }
+  .social-grid a svg{ width:22px !important; height:22px !important; }
+  .social-grid a span{ font-size:.66rem !important; }
+  .social-instagram,.social-privacy{ grid-column:span 1 !important; }
+  .about-rights{ margin-top:10px; padding-top:6px; }
+}
+@media (orientation:landscape) and (max-height:380px){
+  #page-social.active{ padding-top:calc(var(--tabs-h) + 2px) !important; }
+  .about-rights{ margin-top:6px; padding-top:3px; }
+  .about-rights p{ margin:2px 0; }
+}
 .menu-toggle {
   display: flex;
   position: fixed;
@@ -5721,7 +5742,7 @@ function buildOudStatic(){
     // ===== زر تبديل اللغة (AR/EN) — يمين زر المساعدة، بنفس أبعاده بالضبط، مع وميض جذب انتباه أول ما تفتح الصفحة =====
     function makeLanguageBtn(x, y){
       const lg = el('g', { id: 'langToggleBtn', style: 'cursor:pointer;pointer-events:all;' });
-      lg.classList.toggle('lang-btn-pulse', !window._langPulseDismissed); // نطبّق الوميض بس لو المستخدم ما تفاعل مع الموقع لسا (علم عالمي ثابت، مو مرتبط بلحظة الإنشاء)
+      /* وميض زر اللغة ملغى: الكرة الأرضية أيقونة معروفة */ // lg.classList.toggle('lang-btn-pulse', false); // نطبّق الوميض بس لو المستخدم ما تفاعل مع الموقع لسا (علم عالمي ثابت، مو مرتبط بلحظة الإنشاء)
       lg.appendChild(el('rect', {
         x: x - helpBtnW/2, y: y - helpBtnH/2, width: helpBtnW, height: helpBtnH, rx: instBtnR,
         fill: '#a3d0ec', stroke: '#3ab4e8', 'stroke-width': '2', class: 'lang-btn-rect'
@@ -5789,7 +5810,7 @@ function buildOudStatic(){
     const langBtn = makeLanguageBtn(langBtnFinalX, helpY);
     oudControlBtnsLayer.appendChild(langBtn);
     // أي ضغطة بأي مكان بالصفحة (مو بس الزر نفسه) توقف الوميض — "استخدم الموقع" = فهم وجود الزر
-    if (!window._langPulseDismissed) {
+    if (false) {
       document.addEventListener('click', function stopLangPulseOnce(e){
         if (e.target.closest && e.target.closest('#langToggleBtn')) return; // الزر نفسه له معالج منفصل فوق
         // نستثني بقية أزرار التحكم بنفس الصف (يد، عدد أوتار، مساعدة...) — الضغط عليها للتجربة
@@ -5805,7 +5826,7 @@ function buildOudStatic(){
     // ===== زر تبديل نظام تسمية النغمات (Do/C) — يظهر بس بالإنجليزي + صفحة السلالم الغربية، ملاصق لزر اللغة من الخارج =====
     // نبنيه دايماً لو اللغة إنجليزي (بغض النظر عن التبويب الحالي وقت الرسم)، ونتحكم بإظهاره/إخفاؤه لاحقاً
     // عند تبديل التبويب من دالة showPage — لأن هالرسمة (الزند المشترك) تُرسم مرة وحدة بس أول تحميل
-    if (window.oudLanguage === 'en') {
+    {
       function makeNoteSystemBtn(x, y){
         const ng = el('g', { id: 'noteSystemToggleBtn', style: 'cursor:pointer;pointer-events:all;' });
         ng.appendChild(el('rect', {
@@ -5819,13 +5840,15 @@ function buildOudStatic(){
         t.setAttribute('font-size', String(46 * BTN_K));
         t.setAttribute('font-weight', '800');
         t.setAttribute('fill', '#0a2f52');
-        t.textContent = (window.oudNoteSystem === 'letter') ? 'C' : 'Do';
+        const isEnNs = (window.oudLanguage === 'en');
+        t.textContent = (window.oudNoteSystem === 'letter') ? 'Do' : 'C'; // يعرض النظام الذي سينتقل إليه بعد الضغط
         ng.appendChild(t);
-        ng.addEventListener('click', () => {
+        if (!isEnNs) { ng.classList.add('ns-off'); ng.setAttribute('aria-disabled', 'true'); ng.setAttribute('role', 'button'); ng.setAttribute('aria-label', 'تسمية النغمات بالحروف (متاح بالإنجليزية فقط)'); }
+        else ng.addEventListener('click', () => {
           const newSystem = (window.oudNoteSystem === 'letter') ? 'solfege' : 'letter';
           window.oudNoteSystem = newSystem;
           localStorage.setItem('oudNoteSystemPref', newSystem); // يفضل مع تبديلات الجلسة (زي عدد الأوتار)، بس يُمسح صراحة عند تبديل اللغة
-          t.textContent = (newSystem === 'letter') ? 'C' : 'Do';
+          t.textContent = (newSystem === 'letter') ? 'Do' : 'C';
           // نحدّث كل الأماكن المتأثرة حياً بدون إعادة تحميل الصفحة
           if (typeof window.redrawOudEverything === 'function') window.redrawOudEverything();
           if (typeof window.renderAll === 'function') window.renderAll();
@@ -11606,6 +11629,8 @@ st.textContent = `
 #shared-oudSvg.organ-mode #oudStatic,
 #shared-oudSvg.organ-mode #oudNotesLayer,
 #shared-oudSvg.organ-mode #chordHighlightLayer{visibility:hidden;pointer-events:none}
+svg#shared-oudSvg #noteSystemToggleBtn.ns-off{opacity:.4}
+svg#shared-oudSvg #noteSystemToggleBtn.ns-off,svg#shared-oudSvg #noteSystemToggleBtn.ns-off *{pointer-events:none !important;cursor:default !important}
 #shared-oudSvg.organ-mode #oudFooterGroup,#shared-oudSvg.organ-mode #helpBtn{visibility:visible;pointer-events:auto}
 #shared-oudSvg.organ-mode #handToggleBtn,
 #shared-oudSvg.organ-mode #stringCountBtn{visibility:hidden;pointer-events:none}
@@ -11928,47 +11953,34 @@ function layoutBottomRow() {
   const L = brLayer();
   const about = brAdopt('svgContactBtn', L), rate = brAdopt('svgRatingBtn', L), theme = brAdopt('svgThemeBtn', L);
   const fb = document.getElementById('favBtn');
-  const slots = [theme, fb, tg, rate, about];                 // من الحافة الخارجية (جهة الميكروفون) إلى الداخل (جهة زر اللغة)
-  if (slots.some(s => !s)) return;
+  const req = [theme, fb, tg, rate, about];                  // من الحافة الخارجية (جهة الميكروفون) إلى الداخل
+  if (req.some(s => !s)) return;
+  const nsBtn = brAdopt('noteSystemToggleBtn', L), langBtn = brAdopt('langToggleBtn', L), helpBtnEl = brAdopt('helpBtn', L);
+  const slots = req.concat([nsBtn, langBtn, helpBtnEl].filter(Boolean));   // ثمانية أزرار بمسافات متساوية: ... من نحن، دو/سي، اللغة، ؟
   window._bottomRowOn = true;
-  // عنقود زر اللغة/المساعدة/نظام التسمية (بدون زر العود/الأورغ: انتقل للصف)
-  let cl = { left: LR.left, right: LR.right };
-  ['#helpBtn rect', '#noteSystemToggleBtn rect'].forEach(q => { const e = document.querySelector(q); if (!e) return; const r = e.getBoundingClientRect(); if (r.width > 0) { cl.left = Math.min(cl.left, r.left); cl.right = Math.max(cl.right, r.right); } });
-  const onRight = (cl.left + cl.right) / 2 > (MB.left + MB.right) / 2;
+  const onRight = (LR.left + LR.right) / 2 > (MB.left + MB.right) / 2;
   const sgn = onRight ? 1 : -1;
   const Hs = NB.height, Ws0 = NB.width, yC = LR.top + LR.height / 2;
   const outer = organMode ? (onRight ? MB.left : MB.right)           // الأورغ: زر النغمة انتقل للطرف المقابل، فالمرجع الميكروفون وحده
                           : (onRight ? Math.min(MB.left, NB.left) : Math.max(MB.right, NB.right));
-  let limit = onRight ? cl.left : cl.right;                  // حدّ الصف الداخلي: حافة العنقود (أو خط الكتف في العود)
-  {                                                           // خط كتف العود المائل (موجود ومخفي بالأورغ: نستعمله ليتطابق الصف مع العود): لا تتقاطع الأزرار معه
-    const ln = document.getElementById('oudShoulderBot');
-    if (ln && ln.getBoundingClientRect().width > 0) {
-      const lm = ln.getScreenCTM();
-      const p0 = new DOMPoint(ln.x1.baseVal.value, ln.y1.baseVal.value).matrixTransform(lm), p1 = new DOMPoint(ln.x2.baseVal.value, ln.y2.baseVal.value).matrixTransform(lm);
-      const ya = Math.min(p0.y, p1.y), yb = Math.max(p0.y, p1.y), top = yC - Hs / 2, bot = yC + Hs / 2;
-      if (!(yb < top || ya > bot) && Math.abs(p1.y - p0.y) > 0.5) {
-        const xAt = y => p0.x + (Math.min(Math.max(y, ya), yb) - p0.y) * (p1.x - p0.x) / (p1.y - p0.y);
-        const xs = [xAt(top), xAt(bot)], half = 3 * ctm.a;
-        limit = onRight ? Math.min(limit, Math.min.apply(null, xs) - half) : Math.max(limit, Math.max.apply(null, xs) + half);
-      }
-    }
-  }
+  const wrap = document.querySelector('.shared-oud-wrapper'), wr = wrap ? wrap.getBoundingClientRect() : { left: 0, right: window.innerWidth, top: 0 };
+  const far = (wr.left + wr.right) - outer;                    // الحافة البعيدة: متناظرة مع هامش الميكروفون
+  const limit = far;
   const span = (limit - outer) * sgn;
   if (!(span > 40)) return;
   // خمسة أزرار + فراغ بعد آخرها قبل الحدّ الداخلي: كل الفراغات متساوية (تعامل العنقود/الخط كعنصر سادس)
-  const n = 5, gMin = 6;
-  let Wb = Ws0; if ((span - n * Wb) / n < gMin) Wb = (span - n * gMin) / n;
-  const gap = (span - n * Wb) / n;
+  const n = slots.length, gMin = 6;
+  let Wb = Ws0; if ((span - n * Wb) / (n - 1) < gMin) Wb = (span - (n - 1) * gMin) / n;
+  const gap = (span - n * Wb) / (n - 1);
   // خط موحّد: الأكبر الذي تتسع به أطول كلمة بين الأزرار الخمسة
   const cv = _brCv || (_brCv = document.createElement('canvas').getContext('2d'));
   cv.font = '800 100px Cairo, Arial, sans-serif';
   const labelOf = s => (s === fb ? fb.textContent : (s.querySelector('text') ? s.querySelector('text').textContent : '')) || '';
   const pad = Math.max(4, Wb * 0.07);
   let px = Hs * 0.42;
-  slots.forEach(s => { if (s.dataset && s.dataset.icon) return; const w = cv.measureText(labelOf(s)).width / 100; if (w > 0) px = Math.min(px, (Wb - 2 * pad) / (w * 1.04)); });
+  slots.forEach(s => { if ((s.dataset && s.dataset.icon) || s.id === 'helpBtn') return; const w = cv.measureText(labelOf(s)).width / 100; if (w > 0) px = Math.min(px, (Wb - 2 * pad) / (w * 1.04)); });
   const inv = ctm.inverse(), U = v => v / ctm.a;
   const stroke = lr.getAttribute('stroke-width') || '2', rx = parseFloat(lr.getAttribute('rx')) || 16;
-  const wrap = document.querySelector('.shared-oud-wrapper'), wr = wrap ? wrap.getBoundingClientRect() : { left: 0, top: 0 };
   slots.forEach((s, i) => {
     const start = outer + sgn * i * (Wb + gap), left = onRight ? start : start - Wb, top = yC - Hs / 2;
     if (s === fb) {
@@ -11986,8 +11998,8 @@ function layoutBottomRow() {
     text.removeAttribute('transform');
     text.setAttribute('text-anchor', 'middle'); text.setAttribute('dominant-baseline', 'middle');
     text.setAttribute('x', p.x + U(Wb) / 2); text.setAttribute('y', p.y + U(Hs) / 2 + U(px) * 0.06);
-    text.setAttribute('font-size', U(px));
-    text.dataset.fs0 = String(U(px));
+    if (s.id === 'helpBtn') { const qf = 68 * 1.15; text.setAttribute('font-size', String(qf)); text.textContent = (window.oudLanguage === 'en') ? '?' : '\u061F'; text.setAttribute('y', p.y + U(Hs) / 2 + qf * 0.04); }
+    else { text.setAttribute('font-size', U(px)); text.dataset.fs0 = String(U(px)); }
   });
   // توحيد خط زر اللغة وزر دو/سي مع خط الصف السفلي
   applyIcons();
