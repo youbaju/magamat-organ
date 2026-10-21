@@ -11996,10 +11996,14 @@ function layoutBottomRow() {
   window._bottomRowOn = true;
   const onRight = (LR.left + LR.right) / 2 > (MB.left + MB.right) / 2;
   const sgn = onRight ? 1 : -1;
-  const Hs = NB.height, Ws0 = NB.width, yC = LR.top + LR.height / 2;
-  const outer = (onRight ? Math.min(MB.left, NB.left) : Math.max(MB.right, NB.right)); // نفس مرجع العود (الصف العلوي متطابق بالأداتين)
+  const swB = (parseFloat(getComputedStyle(lr).strokeWidth) || 0) * ctm.a;       // سماكة حدّ أزرار SVG بالبكسل
+  const scl = (e) => { const v = (getComputedStyle(e).scale || 'none').split(' '); const x = parseFloat(v[0]) || 1; return [x, v[1] ? (parseFloat(v[1]) || x) : x]; };
+  const nsc = scl(nb);                                                           // تكبير الحجم الظاهر المطبّق على زر النغمة (لا يدخل بحجم الاستطيل)
+  const Hs = NB.height / nsc[1], Ws0 = NB.width / nsc[0], yC = LR.top + LR.height / 2;
+  const outerVis = (onRight ? Math.min(MB.left, NB.left) : Math.max(MB.right, NB.right)); // الحافة الظاهرة للمايك
+  const outer = outerVis + sgn * swB / 2;                                         // مستطيل SVG يبدأ بحيث يطابق حدّه الظاهر حافة المايك
   const wrap = document.querySelector('.shared-oud-wrapper'), wr = wrap ? wrap.getBoundingClientRect() : { left: 0, right: window.innerWidth, top: 0 };
-  const far = (wr.left + wr.right) - outer;                    // الحافة البعيدة: متناظرة مع هامش الميكروفون
+  const far = (wr.left + wr.right) - outer;                    // الحافة البعيدة: متناظرة مع هامش الميكروفون (بالنسبة لمستطيل SVG)
   const limit = far;
   const span = (limit - outer) * sgn;
   if (!(span > 40)) return;
@@ -12007,6 +12011,7 @@ function layoutBottomRow() {
   const n = slots.length, gMin = 6;
   let Wb = Ws0; if ((span - n * Wb) / (n - 1) < gMin) Wb = (span - (n - 1) * gMin) / n;
   const gap = (span - n * Wb) / (n - 1);
+  window._brGeom = { outer, far, gap, Wb, sgn };   // يقرأها ترتيب الصف العلوي ليطابق مسافات الصف السفلي بالضبط
   // خط موحّد: الأكبر الذي تتسع به أطول كلمة بين الأزرار الخمسة
   const cv = _brCv || (_brCv = document.createElement('canvas').getContext('2d'));
   cv.font = '800 100px Cairo, Arial, sans-serif';
@@ -12023,6 +12028,7 @@ function layoutBottomRow() {
       const st = (k, v) => fb.style.setProperty(k, v, 'important');
       st('position', 'absolute'); st('right', 'auto'); st('left', (left - wr.left) + 'px'); st('top', (top - wr.top) + 'px');
       st('width', Wb + 'px'); st('height', Hs + 'px'); st('font-size', px + 'px');
+      if (swB > 0) st('scale', ((Wb + swB) / Wb) + ' ' + ((Hs + swB) / Hs));   // نفس الحجم الظاهر لأزرار SVG
       return;
     }
     const rect = s.querySelector('rect'), text = s.querySelector('text'); if (!rect || !text) return;
@@ -12124,7 +12130,8 @@ function filterRoots() {
     const nb = document.getElementById('noteModeToggleBtn'), mb = document.getElementById('micVerifyHtmlBtn');
     const nb0 = null;
     const ovr0 = document.getElementById('organTopBtnOvr'); if (ovr0) ovr0.remove();
-    if (nb) nb.style.removeProperty('translate'); if (mb) mb.style.removeProperty('translate');
+    if (nb) { nb.style.removeProperty('translate'); nb.style.removeProperty('scale'); } if (mb) { mb.style.removeProperty('translate'); mb.style.removeProperty('scale'); }
+    fb.style.removeProperty('scale');
     const nr = nb ? nb.getBoundingClientRect() : null;
     const MBr = mb ? mb.getBoundingClientRect() : { left: 0, right: 0 };
     const ctm = svg.getScreenCTM(); if (!ctm) return;
@@ -12202,16 +12209,42 @@ function filterRoots() {
         const dxU = (cTarget - (box.left + box.width / 2)) / ctm.a, dyU = (yC - (box.top + box.height / 2)) / ctm.d;
         g.style.transform = 'translate(' + dxU + 'px,' + dyU + 'px)';
       };
-      const wN = (nr && nr.width > 0) ? nr.width : baseW;            // عرض زر النغمة
+      // نفس مسافات الصف السفلي بالضبط: الفراغ بين أزرار الصف العلوي = الفراغ بين أزرار الصف السفلي، والحافة اليمنى لزر النغمة = نهاية الصف السفلي (نهاية الأورغ)
+      const wr0 = document.querySelector('.shared-oud-wrapper'), wrR = wr0 ? wr0.getBoundingClientRect() : { left: 0, right: window.innerWidth };
+      const micL = MBr.left, wN = (nr && nr.width > 0) ? nr.width : baseW;
+      const spanB = (wrR.left + wrR.right) - 2 * micL;
+      const gapB = Math.max(6, (spanB - 8 * wN) / 7);
       const wS = sb ? sb.width * sw : 0, wH = b.width * sw;
-      let edge = onRight ? outer - gap : outer + gap;   // نبتعد عن الحافة الخارجية بقدر الفراغ (لا يلتصق بنهاية الأورغ)
-      let cNote; if (onRight) { cNote = edge - wN / 2; edge -= wN + gap; } else { cNote = edge + wN / 2; edge += wN + gap; }
-      let cHand; if (onRight) { cHand = edge - wH / 2; } else { cHand = edge + wH / 2; }
+      let farR = (wrR.left + wrR.right) - micL;                 // الحافة اليمنى (متناظرة مع هامش المايك)
+      let micLx = micL, gapX = gapB;
+      const G = window._brGeom; if (G && G.sgn === (onRight ? 1 : -1) && isFinite(G.gap)) { farR = G.far; micLx = G.outer; gapX = G.gap; }   // نستخدم هندسة الصف السفلي الفعلية إن توفرت
+      let cNote, cHand;
+      if (onRight) { cNote = farR - wN / 2; cHand = farR - wN - gapX - wH / 2; }
+      else { cNote = micLx + wN / 2; cHand = micLx + wN + gapX + wH / 2; }
       place1(hg, b, cHand);
       if (nb && nr && nr.width > 0) { const cx0 = nr.left + nr.width / 2; nb.style.translate = (cNote - cx0) + 'px ' + (yC - (nr.top + nr.height / 2)) + 'px'; }
-      if (sg && sb) { const gm = nr ? (onRight ? nr.left - MBr.right : MBr.left - nr.right) : gap; const cS = onRight ? (nr ? nr.left : MBr.right + gm) + wS / 2 : (nr ? nr.right : MBr.left - gm) - wS / 2; place1(sg, sb, cS); }
+      if (sg && sb) { place1(sg, sb, onRight ? (micLx + wN + gapX + wS / 2) : (MBr.left - gapX - wS / 2)); }
+      // الحجم الظاهر: حدّ أزرار SVG نصفه خارج المستطيل، فنكبّر أزرار HTML (مايك/نغمة) بمقدار سماكة الحدّ ليتساوى الحجم الظاهر
+      const swPx = (parseFloat(getComputedStyle(hr).strokeWidth) || 0) * ctm.a;
+      [nb, mb].forEach(e => { if (!e || !(swPx > 0)) return; const r0 = e.getBoundingClientRect(); if (r0.width > 0 && r0.height > 0) e.style.setProperty('scale', ((r0.width + swPx) / r0.width) + ' ' + ((r0.height + swPx) / r0.height)); });
     }
     if (typeof window.layoutBottomRow === 'function') window.layoutBottomRow();
+    // تصحيح نهائي مقاس: الحافة اليسرى الظاهرة لكل زر علوي = الحافة اليسرى الظاهرة للزر السفلي تحته تماماً (عمود 1 و2 و7 و8)
+    try {
+      const vl = (e) => { const r = e.getBoundingClientRect(); let w = 0; if (e instanceof SVGElement) { const m = e.getScreenCTM(); w = (parseFloat(getComputedStyle(e).strokeWidth) || 0) * (m ? m.a : 1); } return r.left - w / 2; };
+      const q = (x) => document.querySelector(x), gid = (x) => document.getElementById(x);
+      const pairs = [[mb, q('#svgThemeBtn rect')], [sg && sg.querySelector('rect'), gid('favBtn')], [hg && hg.querySelector('rect'), q('#langToggleBtn rect')], [nb, q('#helpBtn rect')]];
+      const m2 = svg.getScreenCTM();
+      pairs.forEach(([t, bt]) => {
+        if (!t || !bt) return; const d = vl(bt) - vl(t); if (!(Math.abs(d) > 0.05) || Math.abs(d) > 3) return;
+        if (t instanceof SVGElement) {
+          const g = t.parentNode, mm = /translate\(([-\d.e]+)px,\s*([-\d.e]+)px\)/.exec(g.style.transform || '');
+          if (mm && m2) g.style.transform = 'translate(' + (parseFloat(mm[1]) + d / m2.a) + 'px,' + mm[2] + 'px)';
+        } else {
+          const parts = (t.style.translate || '0px 0px').split(' '); t.style.translate = (parseFloat(parts[0]) + d) + 'px ' + (parts[1] || '0px');
+        }
+      });
+    } catch (e) {}
   }
   let _pq = 0;
   new MutationObserver(() => { if (_pq) return; _pq = requestAnimationFrame(() => { _pq = 0; place(); }); }).observe(svg, { childList: true, subtree: true });
