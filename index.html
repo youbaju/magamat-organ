@@ -11992,7 +11992,8 @@ function layoutBottomRow() {
   const req = [theme, fb, tg, rate, about];                  // من الحافة الخارجية (جهة الميكروفون) إلى الداخل
   if (req.some(s => !s)) return;
   const nsBtn = brAdopt('noteSystemToggleBtn', L), langBtn = brAdopt('langToggleBtn', L), helpBtnEl = brAdopt('helpBtn', L);
-  const slots = req.concat([nsBtn, langBtn, helpBtnEl].filter(Boolean));   // ثمانية أزرار بمسافات متساوية: ... من نحن، دو/سي، اللغة، ؟
+  // الترتيب: ثيم، مفضلة، عود/أورغ، دو/سي (الجانب الموسيقي متجاور)، تقييم، من نحن، اللغة، ؟
+  const slots = [req[0], req[1], req[2], nsBtn, req[3], req[4], langBtn, helpBtnEl].filter(Boolean);   // ثمانية أزرار بمسافات متساوية: ... من نحن، دو/سي، اللغة، ؟
   window._bottomRowOn = true;
   const onRight = (LR.left + LR.right) / 2 > (MB.left + MB.right) / 2;
   const sgn = onRight ? 1 : -1;
