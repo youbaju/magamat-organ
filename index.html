@@ -5847,16 +5847,36 @@ function buildOudStatic(){
         const nsLabel = () => {
           const isLetter = (window.oudNoteSystem === 'letter');
           while (t.firstChild) t.removeChild(t.firstChild);
-          [['C', isLetter], [' \u21C4 ', true], [nsSolfWord, !isLetter]].forEach(([txt, on], i) => {
+          [['C', isLetter], ['\u2003\u2002', true], [nsSolfWord, !isLetter]].forEach(([txt, on], i) => {
             const ts = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
             ts.textContent = txt;
             if (i !== 1) ts.setAttribute('fill-opacity', on ? '1' : '0.4');
-            if (i === 1) ts.setAttribute('font-family', "'Segoe UI Symbol','Noto Sans Symbols',Arial,sans-serif");
+            if (!isEnNs) ts.setAttribute('dy', ['0.12em', '-0.12em', '-0.14em'][i]); // بالعربي: C يُنزَل ودو يُرفع ليتوسط كل منهما بصرياً (حرف «و» ينزل تحت السطر)
+            if (i === 1) ts.setAttribute('fill-opacity', '0');   // فراغ فقط: السهمان يُرسمان كمسار مستقل لضمان التوسط بغض النظر عن خط الجهاز
             t.appendChild(ts);
           });
         };
         nsLabel();
         ng.appendChild(t);
+        // سهما التبديل ⇄ كمسار SVG: مركزهما (منتصف المسافة بين السهمين المتخالفين) يطابق منتصف الزر عمودياً بالضبط
+        const nsArrow = el('path', { id: 'noteSystemArrow', fill: 'none', stroke: '#0a2f52', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+        ng.appendChild(nsArrow);
+        window._nsPlaceArrow = () => {
+          try {
+            const rc = ng.querySelector('rect'), sp = t.querySelectorAll('tspan')[1]; if (!rc || !sp) return;
+            const fs = parseFloat(t.getAttribute('font-size')) || 20;
+            const idx = t.textContent.indexOf('\u2003'); if (idx < 0) return;
+            const e = t.getExtentOfChar(idx), e2 = t.getExtentOfChar(idx + 1);
+            if (!(e.width > 0)) return;
+            const cx = (e.x + e2.x + e2.width) / 2, cy = (+rc.getAttribute('y')) + (+rc.getAttribute('height')) / 2;
+            const hw = fs * 0.36, g = fs * 0.15, hd = fs * 0.13, sw = fs * 0.075;
+            nsArrow.setAttribute('stroke-width', sw);
+            nsArrow.setAttribute('d',
+              `M${cx-hw},${cy-g} H${cx+hw} M${cx+hw-hd},${cy-g-hd} L${cx+hw},${cy-g} L${cx+hw-hd},${cy-g+hd}` +
+              ` M${cx+hw},${cy+g} H${cx-hw} M${cx-hw+hd},${cy+g-hd} L${cx-hw},${cy+g} L${cx-hw+hd},${cy+g+hd}`);
+          } catch (err) {}
+        };
+        window._nsPlaceArrow();
         ng.addEventListener('click', () => {
           const newSystem = (window.oudNoteSystem === 'letter') ? 'solfege' : 'letter';
           window.oudNoteSystem = newSystem;
@@ -12052,7 +12072,8 @@ function layoutBottomRow() {
     t.setAttribute('font-size', U(px));
     if (id === 'noteSystemToggleBtn') {
       t.setAttribute('dominant-baseline', 'middle');
-      t.setAttribute('y', (+r.getAttribute('y')) + (+r.getAttribute('height')) / 2 + U(px) * 0.06);
+      t.setAttribute('y', (+r.getAttribute('y')) + (+r.getAttribute('height')) / 2 + U(px) * (window.oudLanguage === 'en' ? 0.03 : -0.07)); // بالعربي حرف «و» ينزل تحت السطر فنرفع النص ليتوسط بصرياً
+      if (typeof window._nsPlaceArrow === 'function') window._nsPlaceArrow();
     }
   });
 }
