@@ -4639,7 +4639,7 @@ function buildChordsForScale(root, scaleType){
     if (quality === 'Diminished') roman += '°';
     else if (quality === 'Augmented') roman += '+';
     let displayName;
-    const RLM = (window.oudLanguage === 'en') ? '' : '\u200F'; // علامة اتجاه خفية (يمين لليسار) تلصق الرمز (# أو x أو ♭) بالحرف العربي الصحيح — تُعطَّل بالإنجليزي لأنها تقلب ترتيب الكلمات اللاتينية
+    const RLM = (window.oudLanguage === 'en' || window.oudNoteSystem === 'letter') ? '' : '\u200F'; // علامة اتجاه خفية (يمين لليسار) تلصق الرمز (# أو x أو ♭) بالحرف العربي الصحيح — تُعطَّل بالإنجليزي لأنها تقلب ترتيب الكلمات اللاتينية
     // اسم جودة الكورد المعروض للمستخدم — معرَّب بالوضع العربي (ماجور/مينور/ديمينيشد/أوجمنتد)،
     // يبقى إنجليزي بالوضع الإنجليزي كما هو. الاسم الداخلي (quality) والرقم الروماني (roman)
     // ما يتأثرون بهذا إطلاقاً — يبقون بنفس القيم الإنجليزية المستخدمة بالمنطق الداخلي فقط
@@ -4773,10 +4773,10 @@ function renderChordHighlight(positions, active){
     });
     label.style.pointerEvents = 'none'; // عشان الضغطة الفعلية توصل للمستطيل تحته، مو تنحبس بالنص فوقه
     const pc = OUD.noteAt(pos.string, pos.fret);
-    const chordNoteName = getCorrectNoteName(pc, pos.letterIdx !== undefined ? pos.letterIdx : 0);
+    const chordNoteName = getCorrectNoteNameRaw(pc, pos.letterIdx !== undefined ? pos.letterIdx : 0);
     // بالإنجليزي: علامة التحويل (# ♭ x) لازم تجي بعد الحرف. النص الواحد داخل صفحة اتجاهها RTL يعرض العلامة قبل الحرف (#Sol)،
     // فنرسم الحرف والعلامة كعنصرَين منفصلَين بنفس طريقة رسم السلم (يطابقها تماماً)
-    const chordParts = (window.oudLanguage === 'en') ? chordNoteName.match(/^(Do|Re|Mi|Fa|Sol|La|Si|C|D|E|F|G|A|B)(#|♭♭|♭|x)$/) : null;
+    const chordParts = (window.oudLanguage === 'en' || window.oudNoteSystem === 'letter') ? chordNoteName.match(/^(Do|Re|Mi|Fa|Sol|La|Si|C|D|E|F|G|A|B)(#|♭♭|♭|x)$/) : null;
     if (chordParts) {
       const letterEl = el('text', {
         x: p.x - 8, y: p.y+7, fill:'#fff', 'font-size':'22',
@@ -6322,6 +6322,11 @@ function getRootLetterIndex(rootPC, scaleType, letterOverride){
 
 // تعطي الاسم الصحيح موسيقيًا (الإملاء الإنهارموني الصحيح) لنوتة معينة حسب حرفها الصحيح بالسلم
 function getCorrectNoteName(pc, letterIdx){
+  const r = getCorrectNoteNameRaw(pc, letterIdx);
+  // بالواجهة العربية مع نظام الحروف: نعزل الاسم (C# / Bb) اتجاهياً عشان العلامة تبقى بعد الحرف لا قبله
+  return (window.oudNoteSystem === 'letter' && window.oudLanguage !== 'en') ? ('\u2066' + r + '\u2069') : r;
+}
+function getCorrectNoteNameRaw(pc, letterIdx){
   const names = (window.oudNoteSystem === 'letter')
     ? LETTER_NAMES_ONLY_LATIN
     : ((window.oudLanguage === 'en') ? LETTER_NAMES_ONLY_EN : LETTER_NAMES_ONLY);
