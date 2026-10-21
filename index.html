@@ -5152,7 +5152,7 @@ const OUD = (function(){
     const tabsBtn = document.getElementById('siteTabsToggle');
     const menuBtn = document.getElementById('c-menuToggle');
     const arMenuBtn = document.getElementById('menuToggle'); // زر اختيار المقام بالجانب العربي (منفصل عن الغربي)
-    if (window.isLeftHanded) {
+    if (window.isLeftHanded) { // تبويب الصفحات وأزرار القوائم تتبدّل مع اليد (الأزرار العلوية والسفلية فقط ثابتة)
       if (tabsBtn) { tabsBtn.style.left = 'auto'; tabsBtn.style.right = '10px'; }
       if (menuBtn) { menuBtn.style.right = 'auto'; menuBtn.style.left = '10px'; }
       if (arMenuBtn) { arMenuBtn.style.right = 'auto'; arMenuBtn.style.left = '10px'; }
@@ -5290,7 +5290,8 @@ window.applyOudHorizontalMirror = function(container){
       img.setAttribute('transform', `translate(${2*ix},0) scale(-1,1)`);
     });
   } else {
-    container.removeAttribute('transform');
+    // وضع اليسار: الرسمة بدون انعكاس، لكن نافذة الرؤية مبنية بتخطيط اليمين (الأزرار ثابتة) فنزيح العود وحده ليبقى بمكانه
+    if (window._oudLeftDx) container.setAttribute('transform', `translate(${window._oudLeftDx},0)`); else container.removeAttribute('transform');
     container.querySelectorAll('text, g[data-scale-idx], image').forEach(el => {
       if (el.dataset && el.dataset.noAutomirror) return; // نستثني عناصر معلّمة صراحة (زي رمز المساعدة) من المسح
       el.removeAttribute('transform');
@@ -5495,7 +5496,7 @@ function buildOudStatic(){
   const midXForHelpRow = (OUD.NUT_X + OUD.NECK_END_X) / 2;
   const mirrorXForHelpRow = (x) => 2 * midXForHelpRow - x;
   const naturalAboveNeckX = OUD.VISUAL_NUT_X + 15 - 22 - 118 * 1.45 * (BTN_K - 1) / 2; // بداية الزند (تأكّد الموضع مع يوسف عبر معاينة فعلية)
-  const micBx = window.isLeftHanded ? naturalAboveNeckX : mirrorXForHelpRow(naturalAboveNeckX);
+  const micBx = mirrorXForHelpRow(naturalAboveNeckX); // الأزرار ثابتة بتخطيط وضع اليمين مهما كانت اليد
   const micBy = OUD.neckTopY(naturalAboveNeckX) - 103 - 66 * 1.45 * (BTN_K - 1) / 2; // نفس ارتفاع صف زر يمين/يسار وعدد الأوتار (فوق الزند)
   const modeBtnW = 118 * handScaleForHelp; // زر وضع النغمات ("نغمة مستمرة"/"Sustained note") — بعرض كافٍ يسع أطول كلمة إنجليزية ("Sustained") بسطر واحد بدون خروج عن حدود الزر
   const modeBtnGap = 10; // فسحة بين الزرين
@@ -5507,7 +5508,7 @@ function buildOudStatic(){
   // خارج حدود الشاشة المرئية بالكامل بوضع "يسار" تحديداً (فيختفي بسبب overflow:hidden بالغلاف)
   const modeOffset = (helpBtnW/2) + modeBtnGap + (modeBtnW/2);
   const naturalModeX = naturalAboveNeckX - modeOffset;
-  const modeBx = window.isLeftHanded ? naturalModeX : mirrorXForHelpRow(naturalModeX);
+  const modeBx = mirrorXForHelpRow(naturalModeX);
   const modeBy = micBy;
   const helpG = el('g', { id: 'helpBtn', style: 'cursor:pointer' });
   helpG.appendChild(el('rect', {
@@ -5527,10 +5528,7 @@ function buildOudStatic(){
   if (window.oudLanguage !== 'en') {
     // نستثني هالعنصر من التصحيح التلقائي، ونطبّق منطقنا الخاص يراعي حالة انعكاس اليد الحالية
     helpTxt.dataset.noAutomirror = 'true';
-    if (window.isLeftHanded) {
-      // بوضع اليسار ما فيه انعكاس خارجي للمجموعة كلها، فنحتاج نضيف الانعكاس يدوياً
-      helpTxt.setAttribute('transform', `translate(${2 * helpBx}, 0) scale(-1, 1)`);
-    }
+    // (بوضع اليسار نعكس مجموعة الزر كلها يدوياً بعد إنشائها، فنفس منطق وضع اليمين ينطبق)
     // بوضع اليمين، الانعكاس الخارجي للمجموعة كافي وحده يعطي الشكل المطلوب، فما نضيف شي إضافي
   }
   helpG.appendChild(helpTxt);
@@ -5556,9 +5554,9 @@ function buildOudStatic(){
     const naturalHand2X = oldHelpBx + (handW/2 + handGap/2) + groupShift;
     const naturalHand3X = naturalHand1X - (handW + handGap);
     // بوضع اليمين (الافتراضي) نعكس المواضع (نفس منطق انعكاس الزند)، وبوضع اليسار نستخدمها كما هي
-    const hand1X = window.isLeftHanded ? naturalHand1X : mirrorXForBtns(naturalHand1X);
-    const hand2X = window.isLeftHanded ? naturalHand2X : mirrorXForBtns(naturalHand2X);
-    const hand3X = window.isLeftHanded ? naturalHand3X : mirrorXForBtns(naturalHand3X);
+    const hand1X = mirrorXForBtns(naturalHand1X);
+    const hand2X = mirrorXForBtns(naturalHand2X);
+    const hand3X = mirrorXForBtns(naturalHand3X);
     const handY = OUD.neckTopY(naturalHand1X) - 103 - 66 * 1.45 * (BTN_K - 1) / 2; // بدّلنا مكانه ليصير فوق الزند (كان مكان زر المساعدة/اللغة سابقاً)
 
     // أيقونة اليد: إيموجي ✋ حقيقي بدل رسمة مخصصة، معكوس أفقياً لتمثيل اليد اليسرى
@@ -5807,7 +5805,7 @@ function buildOudStatic(){
       return lg;
     }
     const naturalLangX = helpBx_outer; // زر اللغة يبقى بمكانه القديم (تحت الزند)، ما تغيّر
-    const langBtnFinalX = window.isLeftHanded ? naturalLangX : mirrorXForBtns(naturalLangX);
+    const langBtnFinalX = mirrorXForBtns(naturalLangX);
     const langBtn = makeLanguageBtn(langBtnFinalX, helpY);
     oudControlBtnsLayer.appendChild(langBtn);
     // أي ضغطة بأي مكان بالصفحة (مو بس الزر نفسه) توقف الوميض — "استخدم الموقع" = فهم وجود الزر
@@ -5879,7 +5877,7 @@ function buildOudStatic(){
         return ng;
       }
       const naturalNoteSysX = naturalLangX + helpBtnW + handGap; // زر جديد بمكان خارجي إضافي (أبعد عن "؟")، ملاصق لزر اللغة من الخارج
-      const noteSysFinalX = window.isLeftHanded ? naturalNoteSysX : mirrorXForBtns(naturalNoteSysX);
+      const noteSysFinalX = mirrorXForBtns(naturalNoteSysX);
       oudControlBtnsLayer.appendChild(makeNoteSystemBtn(noteSysFinalX, helpY));
     }
   }
@@ -6004,11 +6002,13 @@ function buildOudStatic(){
   let maxX = NECK_JOINT_END_X + 5;
   const minY = Math.min(shoulderTopEnd.y, neckJointTopEndY) - 20;
   const maxY = Math.max(shoulderBottomEnd.y, neckJointBottomEndY, visionY + visionSize, oldHelpY + 25 + (66*1.45)/2 + 10) + 20;
-  if (!window.isLeftHanded) {
-    // الرسمة معكوسة أفقياً، فلازم نحسب نافذة الرؤية على نفس الإحداثيات بعد الانعكاس (مو قبله)
+  {
+    // نافذة الرؤية دائماً بتخطيط اليمين (الأزرار ثابتة مهما كانت اليد): نحسبها على إحداثيات الرسمة المعكوسة
     const midX = (OUD.NUT_X + OUD.NECK_END_X) / 2;
     const mirroredMinX = 2*midX - maxX;
     const mirroredMaxX = 2*midX - minX;
+    // بوضع اليسار الرسمة غير معكوسة، فنزيحها لتقع بنفس مكان الرسمة المعكوسة بوضع اليمين
+    window._oudLeftDx = window.isLeftHanded ? (mirroredMinX - minX) : 0;
     minX = mirroredMinX;
     maxX = mirroredMaxX;
   }
@@ -11667,7 +11667,9 @@ svg#shared-oudSvg #noteSystemToggleBtn.ns-off{opacity:.4}
 svg#shared-oudSvg #noteSystemToggleBtn.ns-off,svg#shared-oudSvg #noteSystemToggleBtn.ns-off *{pointer-events:none !important;cursor:default !important}
 #shared-oudSvg.organ-mode #oudFooterGroup,#shared-oudSvg.organ-mode #helpBtn{visibility:visible;pointer-events:auto}
 #shared-oudSvg.organ-mode #handToggleBtn,
-#shared-oudSvg.organ-mode #stringCountBtn{visibility:hidden;pointer-events:none}
+#shared-oudSvg.organ-mode #stringCountBtn{opacity:.4;pointer-events:none !important;cursor:default !important}
+#shared-oudSvg.organ-mode #handToggleBtn *,
+#shared-oudSvg.organ-mode #stringCountBtn *{pointer-events:none !important;cursor:default !important}
 #organLayer .okey{cursor:pointer;transition:transform .06s}
 #organLayer .okey.off{cursor:default}
 svg#shared-oudSvg #organLayer .okey.off rect{pointer-events:none}
@@ -11995,8 +11997,7 @@ function layoutBottomRow() {
   const onRight = (LR.left + LR.right) / 2 > (MB.left + MB.right) / 2;
   const sgn = onRight ? 1 : -1;
   const Hs = NB.height, Ws0 = NB.width, yC = LR.top + LR.height / 2;
-  const outer = organMode ? (onRight ? MB.left : MB.right)           // الأورغ: زر النغمة انتقل للطرف المقابل، فالمرجع الميكروفون وحده
-                          : (onRight ? Math.min(MB.left, NB.left) : Math.max(MB.right, NB.right));
+  const outer = (onRight ? Math.min(MB.left, NB.left) : Math.max(MB.right, NB.right)); // نفس مرجع العود (الصف العلوي متطابق بالأداتين)
   const wrap = document.querySelector('.shared-oud-wrapper'), wr = wrap ? wrap.getBoundingClientRect() : { left: 0, right: window.innerWidth, top: 0 };
   const far = (wr.left + wr.right) - outer;                    // الحافة البعيدة: متناظرة مع هامش الميكروفون
   const limit = far;
@@ -12174,10 +12175,10 @@ function filterRoots() {
     const og = organMode ? document.getElementById('organLayer') : null, ob = og ? og.getBoundingClientRect() : null;
     [nb, mb].forEach(e => {
       if (!e) return; const r = e.getBoundingClientRect(); if (!(r.width > 0)) return;
-      let dx = 0; if (e === nb && ob && ob.width > 0) dx = onRight ? (ob.right - r.right) : (ob.left - r.left);
+      let dx = 0; // الأورغ: زر النغمة بنفس مكانه بالعود (بجانب المايك)، وزرّا اليد والأوتار معطّلان بمكانهما
       e.style.translate = dx + 'px ' + (yC - (r.top + r.height / 2)) + 'px';
     });
-    if (!organMode) {
+    {
       // أزرار العود: تكبير مستطيلاتها ونصوصها حول مراكزها، ثم تتابعها للداخل بعد المفضلة بنفس الفراغ
       const grow = (g, box) => {
         const cy = (+g.querySelector('rect').dataset.y0) + (+g.querySelector('rect').dataset.h0) / 2;
@@ -12230,7 +12231,7 @@ function filterRoots() {
     // أقرب عائق يمين/يسار المنتصف على الصف نفسه
     const ids = ['micVerifyHtmlBtn', 'noteModeToggleBtn'];
     const rects = ids.map(i => document.getElementById(i)).filter(Boolean).map(e => e.getBoundingClientRect());
-    if (!organMode) ['#handToggleBtn rect', '#stringCountBtn rect'].forEach(q => { const e = document.querySelector(q); if (e) rects.push(e.getBoundingClientRect()); });
+    ['#handToggleBtn rect', '#stringCountBtn rect'].forEach(q => { const e = document.querySelector(q); if (e) rects.push(e.getBoundingClientRect()); });
     let lim = Infinity;
     rects.forEach(r => { if (!r.width) return; if (r.right <= cx) lim = Math.min(lim, cx - r.right); else if (r.left >= cx) lim = Math.min(lim, r.left - cx); });
     const maxW = isFinite(lim) ? 2 * (lim - 10) : Infinity;
