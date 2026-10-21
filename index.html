@@ -5851,7 +5851,6 @@ function buildOudStatic(){
             const ts = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
             ts.textContent = txt;
             if (i !== 1) ts.setAttribute('fill-opacity', on ? '1' : '0.4');
-            if (!isEnNs) ts.setAttribute('dy', ['0.12em', '-0.12em', '-0.14em'][i]); // بالعربي: C يُنزَل ودو يُرفع ليتوسط كل منهما بصرياً (حرف «و» ينزل تحت السطر)
             if (i === 1) ts.setAttribute('fill-opacity', '0');   // فراغ فقط: السهمان يُرسمان كمسار مستقل لضمان التوسط بغض النظر عن خط الجهاز
             t.appendChild(ts);
           });
@@ -12071,8 +12070,9 @@ function layoutBottomRow() {
     const r = g.querySelector('rect'), t = g.querySelector('text'); if (!r || !t) return;
     t.setAttribute('font-size', U(px));
     if (id === 'noteSystemToggleBtn') {
-      t.setAttribute('dominant-baseline', 'middle');
-      t.setAttribute('y', (+r.getAttribute('y')) + (+r.getAttribute('height')) / 2 + U(px) * (window.oudLanguage === 'en' ? 0.03 : -0.07)); // بالعربي حرف «و» ينزل تحت السطر فنرفع النص ليتوسط بصرياً
+      // سطر واحد بخط أساس واحد (بدون dominant-baseline لأنه يختلف بين المتصفحات): ارتفاع الحرف الكبير يتوسط الزر، والسهمان بنفس المركز
+      t.removeAttribute('dominant-baseline');
+      t.setAttribute('y', (+r.getAttribute('y')) + (+r.getAttribute('height')) / 2 + U(px) * (0.716 / 2 + (window.oudLanguage === 'en' ? -0.04 : -0.05)));
       if (typeof window._nsPlaceArrow === 'function') window._nsPlaceArrow();
     }
   });
