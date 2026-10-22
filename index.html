@@ -12082,6 +12082,25 @@ function layoutBottomRow() {
       if (typeof window._nsPlaceArrow === 'function') window._nsPlaceArrow();
     }
   });
+  trimShoulder();
+}
+// نقصّ خط كتف العود السفلي عند أعلى صف الأزرار السفلي، حتى لا يظهر طرفه بين الأزرار (يُحسب بإحداثيات الشاشة فيصح بالعود الأيمن والأيسر وكل المقاسات)
+function trimShoulder() {
+  try {
+    const ln = document.getElementById('oudShoulderBot'), tb = document.querySelector('#svgThemeBtn rect');
+    if (!ln || !tb) return;
+    if (!ln.dataset.o) ln.dataset.o = [ln.getAttribute('x1'), ln.getAttribute('y1'), ln.getAttribute('x2'), ln.getAttribute('y2')].join(',');
+    const [x1, y1, x2, y2] = ln.dataset.o.split(',').map(Number);
+    const m = ln.getScreenCTM(); if (!m) return;
+    const sv = ln.ownerSVGElement, pt = (x, y) => { const q = sv.createSVGPoint(); q.x = x; q.y = y; return q.matrixTransform(m); };
+    const k = Math.hypot(m.a, m.b), cap = (parseFloat(ln.getAttribute('stroke-width')) || 6) * k / 2; // نصف سماكة الخط المستدير (طرفه يمتد بعد نقطة النهاية)
+    const a1 = pt(x1, y1), a2 = pt(x2, y2), fb = document.getElementById('favBtn'), mb = tb.getScreenCTM(),
+      sh = (parseFloat(getComputedStyle(tb).strokeWidth) || 0) * (mb ? Math.hypot(mb.a, mb.b) : 1) / 2, // الحدّ المرئي للزر يبرز نصف سماكة الإطار فوق مستطيله
+      rowTop = Math.min(tb.getBoundingClientRect().top - sh, fb ? fb.getBoundingClientRect().top : 1e9) - 3 - cap;
+    let nx = x2, ny = y2;
+    if (a2.y > rowTop && a2.y > a1.y && a1.y < rowTop) { const t = (rowTop - a1.y) / (a2.y - a1.y); nx = x1 + t * (x2 - x1); ny = y1 + t * (y2 - y1); }
+    ln.setAttribute('x2', nx); ln.setAttribute('y2', ny);
+  } catch (e) {}
 }
 window.layoutBottomRow = layoutBottomRow;
 
@@ -12096,7 +12115,7 @@ const mo = new MutationObserver(sched);
 const cb = document.getElementById('oudControlBtnsLayer');
 if (cb) new MutationObserver(() => { placeToggle(); layoutFooter(); }).observe(cb, { childList: true });
 const os = document.getElementById('oudStatic');
-if (os) new MutationObserver(() => { if (organMode) sched(); }).observe(os, { childList: true });
+if (os) new MutationObserver(() => { if (organMode) sched(); trimShoulder(); }).observe(os, { childList: true });
 placeToggle(); render();
 try { new ResizeObserver(() => { if (svgShown()) { placeToggle(); if (organMode) render(); else layoutFooter(); } }).observe(svg); } catch (e) {}
 setTimeout(() => { placeToggle(); render(); }, 600);
